@@ -34,6 +34,8 @@ spec:
           emptyDir: {}
         - name: rsync-scene-files
           emptyDir: {}
+        - name: rsync-config-files
+          emptyDir: {}
         - name: nvindex-conf-vol
           configMap:
             name: nvindex-conf
@@ -68,6 +70,13 @@ spec:
               mountPath: /scenes
           command: ['bash']
           args: ['-c', 'gsutil -m rsync -d -r -x ".*\/data\/*.*$" {{ .Values.dataLocation }} /scenes']
+        - name: rsync-config-files
+          image: google/cloud-sdk:alpine
+          volumeMounts:
+            - name: rsync-config-files
+              mountPath: /config-external
+          command: ['bash']
+          args: ['-c', 'gsutil -m rsync -d -r {{ .Values.configLocation }} /config-external']
       containers:
         - name: nvindex-tape
           image: "{{ .Values.imageNvindex }}"
@@ -85,6 +94,8 @@ spec:
           env:
             - name: NVINDEX_DATA
               value: "{{ .Values.dataLocation }}"
+            - name: LICENSE_SEARCH_PATH
+              value: "/config-external"
           ports:
           - containerPort: 5555
           - containerPort: 10000
@@ -96,6 +107,8 @@ spec:
             mountPath: /scenes
           - name: nvindex-conf-vol
             mountPath: /config
+          - name: rsync-config-files
+            mountPath: /config-external
           resources:
             limits:
               nvidia.com/gpu: "{{ .Values.gpuCount }}"

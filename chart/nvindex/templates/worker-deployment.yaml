@@ -17,6 +17,17 @@ spec:
         app.kubernetes.io/name: "{{ .Release.Name }}"
         app.kubernetes.io/component: worker
     spec:
+      volumes:
+        - name: rsync-config-files
+          emptyDir: {}
+      initContainers:
+        - name: rsync-config-files
+          image: google/cloud-sdk:alpine
+          volumeMounts:
+            - name: rsync-config-files
+              mountPath: /config-external
+          command: ['bash']
+          args: ['-c', 'gsutil -m rsync -d -r {{ .Values.configLocation }} /config-external']
       containers:
         - name: nvindex-tape
           image: "{{ .Values.imageNvindex }}"
@@ -31,7 +42,12 @@ spec:
             '-app::enable_fail_safety', 'yes',
             '-dice::network::discovery_address', '$(NVINDEX_DISCOVERY_SERVICE_HOST):$(NVINDEX_DISCOVERY_SERVICE_PORT)',
           ]
-          env: []
+          env:
+            - name: LICENSE_SEARCH_PATH
+              value: "/config-external"
+          volumeMounts:
+          - name: rsync-config-files
+            mountPath: /config-external
           ports:
           - containerPort: 5555
           - containerPort: 10000
