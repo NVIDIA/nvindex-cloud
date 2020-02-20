@@ -1,0 +1,63 @@
+{{ if and .Values.gcpMarketplace (eq .Values.gcpMarketplace true) }}
+---
+apiVersion: app.k8s.io/v1beta1
+kind: Application
+metadata:
+  name: "{{ .Release.Name }}"
+  annotations:
+    kubernetes-engine.cloud.google.com/icon: >-
+      data:image/png;base64,{{ .Files.Get "logo.png" | b64enc }}
+    marketplace.cloud.google.com/deploy-info: '{partner_id: "nvidia", product_id: "nvindex", partner_name: "NVIDIA"}'
+  labels:
+    app.kubernetes.io/name: "{{ .Release.Name }}"
+spec:
+  descriptor:
+    type: IndeX
+    version: '0.1'
+    description: |-
+      NVIDIA IndeX (TM) is a commercial 3D volumetric visualization SDK that allows
+      scientists and researchers to visualize and interact with massive data sets,
+      make real-time modifications, and navigate to the most pertinent parts of
+      the data, all in real-time, to gather better insights faster. IndeX leverages
+      GPU clusters for scalable, real-time, visualization and computing of multi-valued
+      volumetric data together with embedded geometry data.
+
+    notes: |-
+
+      Connect to the IndeX Viewer by clicking on the "Viewer URL". The username and
+      password are under "Viewer user" and "Viewer password" sections.
+
+      Links:
+      - [NVIDIA IndeX page](https://developer.nvidia.com/index)
+      - [Documentation](https://github.com/NVIDIA/nvindex-cloud)
+
+  info:
+  - name: Viewer URL
+    type: Reference
+    valueFrom:
+      serviceRef:
+        name: "{{ .Release.Name }}-viewer"
+  - name: Viewer user
+    value: nvindex
+  - name: Viewer password
+    type: Reference
+    valueFrom:
+      type: SecretKeyRef
+      secretKeyRef:
+        name: "{{ .Release.Name }}-password"
+        key: viewer-password
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "{{ .Release.Name }}"
+  componentKinds:
+  - group: apps/v1beta2
+    kind: Deployment
+  - group: batch/v1
+    kind: Job
+  - group: v1
+    kind: Service
+  - group: v1
+    kind: ConfigMap
+  - group: v1
+    kind: Secret
+{{  end }}

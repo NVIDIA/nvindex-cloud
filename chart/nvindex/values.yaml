@@ -1,0 +1,22 @@
+# from schema.yaml
+#
+name: nvindex
+imageNvindex: null
+nodeCount: 1
+gpuCount: 1
+
+tls:
+  base64EncodedPrivateKey: null
+  base64EncodedCertificate: null
+
+viewerGeneratedPassword: null
+
+dataLocation: null
+
+gcpMarketplace: true
+
+# NGINX is used as a proxy to the viewer.
+useNginx: true
+
+# No need to expose the web socket directly.
+exposeWebSocket: false

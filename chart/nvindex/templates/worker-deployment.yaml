@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: "{{ .Release.Name }}-worker"
+  labels:
+    app.kubernetes.io/name: "{{ .Release.Name }}"
+    app.kubernetes.io/component: worker
+spec:
+  replicas: {{ add .Values.nodeCount -1 }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: "{{ .Release.Name }}"
+      app.kubernetes.io/component: worker
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: "{{ .Release.Name }}"
+        app.kubernetes.io/component: worker
+    spec:
+      containers:
+        - name: nvindex-tape
+          image: "{{ .Values.imageNvindex }}"
+          command: [ './nvindex-remote-service.sh' ]
+          args: [
+            '--nogl',
+            '--reference-viewer',
+            '--components',
+            '--add', 'project_remote.prj',
+            '-dice::network::mode', 'TCP_WITH_DISCOVERY',
+            '-dice::network::retention', '30',
+            '-app::enable_fail_safety', 'yes',
+            '-dice::network::discovery_address', '$(NVINDEX_DISCOVERY_SERVICE_HOST):$(NVINDEX_DISCOVERY_SERVICE_PORT)',
+          ]
+          env: []
+          ports:
+          - containerPort: 5555
+          - containerPort: 10000
+          - containerPort: 10001
+          resources:
+            limits:
+              nvidia.com/gpu: "{{ .Values.gpuCount }}"

@@ -1,0 +1,144 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: nvindex-conf
+data:
+  extra.prj: |
+    #! index_app_project 0
+    # -*- mode: Conf; -*-
+
+    index::debug_configuration::rasterizer_memory_allocation=-1
+    app::enable_pick_operations=no
+
+    app::cluster_size = {{ .Values.nodeCount }}
+
+    app::setup::enabled = yes
+    app::setup::scene_directory = /scenes
+
+    # layout
+    index::app::viewer_command::preset_loader::layout::directory = /config
+    index::app::viewer_command::preset_loader::layout::filetype  = .json
+    index::app::viewer_command::preset_loader::layout::default   = layout_startup.json
+  layout_startup.json: |
+    {
+        "panel_preset": [
+            {
+                "name": "Colormap Sketch Editor",
+                "type": "colormap",
+                "domain": [0, 1],
+                "ui_hide_entries": { "channel": 1, "map index": 1 },
+                "background_resolution": [15,10],
+                "ui_hide_panel": false
+            },
+            { "name": "Scene Graph", "type": "scenelist", "ui_hide_panel": true },
+            { 
+                "name": "Rendering Setup", "type": "configuration", 
+                "ui_hide_panel": false, 
+                "ui_hide_entries": {"video encoder": 2, "rendering properties": 1, "canvas filters": 1, "global region of interest": 0} 
+            }
+        ],
+        "panel_static_preset": {
+            "status": {
+                "name": "Warning",
+                "type": "status",
+                "ui_panel_mode": "invisible",
+                "id": 0,
+                "is_static": true
+            }
+        },
+        "panel_menu_entries": [
+            {
+                "group_title": "Scene Element Panels",
+                "group_entries": [
+                    {
+                        "type": "scenelist",
+                        "title": "Scene Graph"
+                    },
+                    {
+                        "type": "plane",
+                        "title": "Plane"
+                    },
+                    {
+                        "type": "colormap",
+                        "title": "Colormap Sketch-Editor"
+                    },
+                    {
+                        "type": "colormap-curve",
+                        "title": "Colormap Curve-Editor"
+                    },
+                    {
+                        "type": "camera",
+                        "title": "Camera"
+                    },
+                    {
+                        "type": "mapping",
+                        "title": "Element Mapping"
+                    },
+                    {
+                        "type": "code",
+                        "title": "CUDA Editor"
+                    },
+                    {
+                        "type": "parameter",
+                        "title": "CUDA Parameters"
+                    }
+                ]
+            },
+            {
+                "group_title": "Configuration",
+                "group_entries": [
+                    {
+                        "type": "message",
+                        "title": "Command Handler"
+                    },
+                    {
+                        "type": "animation",
+                        "title": "Animation Controls"
+                    },
+                    {
+                        "type": "configuration",
+                        "title": "Rendering Controls"
+                    }
+                ]
+            },
+            {
+                "group_title": "Properties",
+                "group_entries": [
+                    {
+                        "type": "performance",
+                        "title": "Basic Performance"
+                    },
+                    {
+                        "type": "detailed_performance",
+                        "title": "Advanced Performance"
+                    },
+                    {
+                        "type": "pick",
+                        "title": "Picking Operations"
+                    },
+                    {
+                        "type": "credits",
+                        "title": "Display Credits"
+                    },
+                    {
+                        "type": "tutorial",
+                        "title": "Viewer Tutorials"
+                    }
+                ]
+            }
+        ],
+        "viewer_configuration": {
+            "btn_menu_down": false,
+            "hide_panelbar": false,
+            "hide_sidebar": false,
+            "hide_server_panel": true,
+            "use_mouse_wheel": false,
+            "preset_reload": true,
+            "preset_requested": false,
+            "preset_type": "layout",
+            "help_url": "https://nvindex-data-samples.storage.googleapis.com/doc/README.md",
+            "menu_open": "none",
+            "preview_entry": {},
+            "server_entry": {}
+        }
+    }

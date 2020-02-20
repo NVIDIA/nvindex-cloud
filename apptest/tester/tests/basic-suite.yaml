@@ -1,0 +1,39 @@
+actions:
+- name: Test that server is up, but auth is required
+  httpTest:
+    url: http://{{ .Env.EXTERNAL_IP }}
+    expect:
+      statusCode:
+        equals: 401
+- name: Test HTTP with username and password
+  bashTest:
+    script: curl -f -u nvindex:${VIEWER_PASSWORD} "http://${EXTERNAL_IP}"
+    expect:
+      exitCode:
+        equals: 0
+- name: Test HTTPS with username and password
+  bashTest:
+    script: curl -f -u nvindex:${VIEWER_PASSWORD} --insecure "https://${EXTERNAL_IP}"
+    expect:
+      exitCode:
+        equals: 0
+
+- name: Test WS with username and password
+  bashTest:
+    script: |-
+        curl --include \
+            --no-buffer \
+            --user nvindex:${VIEWER_PASSWORD} \
+            --header "Connection: Upgrade"  \
+            --header "Upgrade: websocket" \
+            --header "Host: ${EXTERNAL_IP}:80" \
+            --header "Sec-WebSocket-Key: SGVsbG8sIHdvcmxkIQ==" \
+            --header "Sec-WebSocket-Version: 13" \
+            --max-time 1 \
+            --output - \
+            "http://${EXTERNAL_IP}/index_command_client"
+    expect:
+      stdout:
+        contains: "X-NVIDIA-WebSocket-Hash: New"
+      exitCode:
+        equals: 28
