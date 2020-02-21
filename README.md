@@ -1,24 +1,24 @@
 # Overview
 
-NVIDIA IndeX is a 3D volumetric interactive visualization SDK that allows
-scientists and researchers to visualize and interact with massive data sets,
+NVIDIA IndeX is a 3D volumetric, interactive visualization SDK.
+Scientists and researchers use NVIDIA IndeX to visualize and interact with massive data sets,
 make real-time modifications, and navigate to the most pertinent parts of the
-data, all in real-time, to gather better insights faster. IndeX leverages GPU
-clusters for scalable, real-time, visualization and computing of multi-valued
+data, all in real-time, making it possible to gather better insights faster. IndeX leverages GPU-accelerated
+clusters for scalable, real-time, visualization and computing of multi-valued,
 volumetric data together with embedded geometry data.
 
-To learn more about NVIDIA IndeX, please go to our [page](https://developer.nvidia.com/index).
+To learn more about NVIDIA IndeX, go to [page](https://developer.nvidia.com/index).
 
 This application allows you to run NVIDIA IndeX in a Kubernetes cluster. The
-viewer that comes bundled with the IndeX release is used. By default it loads
-and shows a demo dataset. TODO: reference. Users can load their own data in
-IndeX. This will be desribed in a section below.
+viewer that comes bundled with the NVIDIA IndeX release is used. By default, the viewer loads
+and displays a rendered demo dataset. TODO: reference. Users can also load their own data in
+NVIDIA IndeX as described in the [Loading your own data](#loading-your-own-data) section.
 
-The Kubernetes cluster in which the IndeX application is installed requires
-having available NVIDIA GPUs for the application to function correctly.
+The Kubernetes cluster in which the NVIDIA IndeX application is installed requires
+NVIDIA GPUs for the application to run correctly.
 
 The application can be launched either by "Click to Deploy" directly from the
-Google Marketplace or by using the command line. Both ways are covered in this
+Google Marketplace or by using the command line. Both launch choices are described in this
 document.
 
 
@@ -26,27 +26,27 @@ document.
 
 ![Architecture diagram](resources/nvindex-k8s-app-architecture.png)
 
-The application starts a IndeX cluster instance, which is available on the
-exposed viewer service on HTPP and HTTPS. The session is protected by a user
-(nvindex) and a password. The password can be entered manually when launching
-via CLI or is generated automatically when using the Click To Deploy.
+The application starts an NVIDIA IndeX cluster instance, available from the
+exposed viewer service on HTPP and HTTPS. The session is protected by a user ID
+(nvindex) and a password. The password can be entered manually when launching the application 
+from the command line interface or generated automatically when using "Click To Deploy".
 
 The TLS certificates are generated automatically for "Click to Deploy" (self
-signed). When using CLI they have to be provided by the user. More details are
-provided in the  [Update your SSL certificate](#update-your-ssl-certificate)
+signed). When using the command line interface, they have to be provided by the user. More details are
+provided in the [Update your SSL certificate](#update-your-ssl-certificate)
 section.
 
-To achieve scaling of large volume data, IndeX runs in a cluster. For a cluster
-of N nodes, one of these nodes will have the extra responsibility of serving the
-UI, the other nodes will be workers. That means there is 1 viewer and N-1 workers
-in a cluster of N nodes. In Kubernetes, this is modeled through 2 deployments:
-    - The viewer deployment: which has 1 replica.
+To achieve scaling of large volume data, NVIDIA IndeX runs in a cluster. For a cluster
+of N nodes, one node has the additional responsibility of serving the
+UI (viewer?). All the other nodes are workers. That means there is one viewer and N-1 workers
+in a cluster of N nodes. In Kubernetes, this is modeled using two deployments:
+    - The viewer deployment: which has one replica.
     - The worker deployment: which has N-1 replicas.
 
-For a cluster of size 1 (N=1), there will be 1 viewer and 0 workers.
+For a cluster of size 1 (N=1), there is one viewer and zero workers.
 
-There are 2 ClusterIP services set up for setting up and running the cluster.
-For public access, there will be a LoadBalancer service which points to the viewer
+Two ClusterIP services are provided to set up and run the cluster.
+For public access, a LoadBalancer service is provided that points to the viewer
 pod.
 
 Loading your own data is covered in the [Loading your own data](#loading-your-own-data) section.
@@ -54,9 +54,9 @@ Loading your own data is covered in the [Loading your own data](#loading-your-ow
 
 # Installation
 
-## Quick Install via Google Cloud Marketplace
+## Quick Install using Google Cloud Marketplace
 
-For a quick spin of NVIDIA IndeX, you can launch it directly from the Google
+For a quick look at NVIDIA IndeX, you can launch it directly from the Google
 Cloud Marketplace. Follow the
 [on-screen instructions](https://console.cloud.google.com/marketplace/details/google/nvindex).
 
@@ -66,7 +66,7 @@ Before launching, make sure that you have NVIDIA GPUs available in the cluster.
 
 ### Prerequisites
 
-You'll need the following tools in your development environment. If you are
+You will need the following tools in your development environment. If you are
 using Cloud Shell, `gcloud`, `kubectl`, Docker, and Git are installed in your
 environment by default.
 
@@ -134,7 +134,7 @@ Navigate to the `gcp-marketplace` directory:
 cd gcp-marketplace/
 ```
 
-### Setting up the Variables
+### Setting up the variables
 
 First, set the name and namespace:
 ```shell
@@ -142,18 +142,18 @@ export NAME=my-nvindex-app
 export NAMESPACE=default
 ```
 
-Next, choose the number of nodes and how many GPUs you have allocated in one node:
+Next, choose the number of nodes and how many GPUs you have allocated to one node:
 ```shell
 export NODE_COUNT=1
 export GPU_COUNT=1
 ```
-Note: It is possible to launch the application with 0 gpus, but nothing will be rendered.
+Note: It is possible to launch the application with zero (0) GPUs, but nothing will be rendered.
 
 A password has to be selected:
 ```shell
 export NVINDEX_PASSWORD=testpassword
 ```
-The user will always be `nvindex`.
+The user is always `nvindex`.
 
 Load the default dataset and scene file:
 
@@ -162,7 +162,7 @@ export NVINDEX_DATA_LOCATION="gs://nvindex-data-samples/supernova_ncsa_small"
 export NVINDEX_SCENE_FILE=default-scene.yaml
 ```
 
-For loading your own dataset, please refer to the [Loading your own data](#loading-your-own-data)
+To load your own dataset, see the [Loading your own data](#loading-your-own-data)
 section.
 
 Configure the launcher image:
@@ -171,7 +171,7 @@ export TAG=0.3
 export NVINDEX_IMAGE="https://marketplace.gcr.io/nvidia-nvidx/nvindex:${TAG}"
 ```
 
-Create a new certificate (if you have your own, skip this step:
+IF you have your own certificate, skip this step. Otherwise create a new certificate:
 
 ```shell
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
@@ -199,7 +199,7 @@ kubectl create namespace "$NAMESPACE"
 
 ### Expand the manifest template
 
-Use `helm template` to expand the template. We recommend that you save the
+Use `helm template` to expand the template. It is recommended that you save the
 expanded manifest file for future updates to the application.
 
 ```shell
@@ -216,16 +216,16 @@ helm template chart/nvindex \
     > ${NAME}_manifest.yaml
 ```
 
-#### Apply the Manifest to your Kubernetes Cluster
+#### Apply the manifest to your Kubernetes cluster
 
 Use `kubectl` to apply the manifest to your Kubernetes cluster:
 
 ```shell
 kubectl apply -f "${NAME}_manifest.yaml" --namespace "${NAMESPACE}"
 ```
-Once the deployment is ready, you can proceed to the next section.
-Please make sure that the viewer service has a external IP assigned
-before proceeding.
+After the deployment is ready, check 
+that the viewer service has a external IP assigned
+and proceed to the next section.
 
 #### Connecting to the NVIDIA IndeX viewer
 
@@ -237,13 +237,13 @@ To connect to the viewer, there are two possibilities:
 - Go to the Application section of the Kubernetes cluster. Select the
   application. There you should see the external IP at which the viewer
   is accessible, the username and the password.
-  To get the GCP Console URL for your app, run the following command:
+  To get the GCP Console URL for your application, run the following command:
 
    ```shell
         echo "https://console.cloud.google.com/kubernetes/application/${ZONE}/${CLUSTER}/${NAMESPACE}/${NAME}"
    ```
 
-- Another approach is to get the IP and credentials from the CLI:
+- Another approach is to get the IP and credentials from the command line interface:
 
     ```shell
         echo "Login: https://"$(kubectl get service/${NAME}-viewer --namespace ${NAMESPACE} --output jsonpath='{.status.loadBalancer.ingress[0].ip}')"
@@ -256,23 +256,23 @@ Both HTTP and HTTPS can be used.
 Once logged in, you should see the following page:
 ![Successful launch](resources/successful_launch.png)
 
-For more info on using the application, please refer to the
+For more information about using NVIDIA IndeX, refer to the
 [Using NVIDIA IndeX](#using-nvidia-index) section.
 
-### Delete the Application from the Kubernetes Cluster
+### Delete the Application from the Kubernetes cluster
 
 ```shell
 kubectl delefe -f "${NAME}_manifest.yaml"
 ```
 
-# Loading your own Data
+# Loading your own data
 
-If you want to load and visualize your own data, you will have to:
+If you want to load and visualize your own data, you must:
 
 * Upload your data to a Google Storage Bucket.
 * Write a scene file describing where your data is located and how it should
   be rendered.
-* Upload scene data and meta-data to the same bucket as the data.
+* Upload the scene data and meta-data to the same bucket as the data.
 
 
 ## Directory structure
@@ -286,22 +286,24 @@ gs://your-bucket/root/example_dataset1/scene/
 ```
 
 The scene file and metadata must go into `gs://your-bucket/root/example_dataset1/scene`.
-The root directory `gs://your-bucket/root` will be copied to the `/scenes`
-directory in the container. The application will look into the `/scenes` directory
-and scan for first level directories that contain the path `scene/scene.prj` and
+The root directory `gs://your-bucket/root` is copied to the `/scenes`
+directory in the container. The application looks in the `/scenes` directory
+and scans for first level directories that contain the path `scene/scene.prj` and
 that path is a valid scene file config. All the directories matching this
-criteria will be shown in the scene selector.
+criteria are shown in the scene selector.
 
-The data directory is not copied inside the container: the IndeX application
-reads it directly from the bucket. That also means that the data can be stored
+The data directory is not copied inside the container; the NVIDIA IndeX application
+reads it directly from the bucket. This means that the data can be stored
 in a different location/bucket.
 
 ## Scene file
 
 When loading your own data, a scene configuration is required (`scene.prj`).
 This file and it's dependencies (colormaps, xac shaders, etc) have to be
-present in the same directory. Note: the data is an exception here, it can
+present in the same directory. 
+
+Note: In this case, the data is an exception. It can
 be stored in any path specified in the project file.
 
-A good example of a scene file would be the default scene found
+A good example of a scene file is the default scene found
 under `gs://nvindex-data-samples/scenessupernova_ncsa_small/scene/scene.prj`.

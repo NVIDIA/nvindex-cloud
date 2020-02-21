@@ -15,6 +15,10 @@ data:
     app::setup::enabled = yes
     app::setup::scene_directory = /scenes
 
+    # let's start with a larger resolution
+    index::canvas_resolution                    = 1920 1080
+    index::image_file_canvas_resolution         = 1920 1080
+
     # layout
     index::app::viewer_command::preset_loader::layout::directory = /config
     index::app::viewer_command::preset_loader::layout::filetype  = .json
