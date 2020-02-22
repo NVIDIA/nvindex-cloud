@@ -76,27 +76,11 @@ environment by default.
 -   [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 -   [helm](https://helm.sh/)
 
-Configure `gcloud` as a Docker credential helper:
+A Google Kubernetes Engine cluster with GPU nodes. Ideally, the GPU nodes should
+be within their own node pool.
 
 ```shell
 gcloud auth configure-docker
-```
-
-#### Create a Google Kubernetes Engine cluster
-
-Create a new cluster from the command line:
-
-```shell
-export CLUSTER=nvindex-cluster
-export ZONE=us-west1-a
-
-gcloud container clusters create "$CLUSTER" --zone "$ZONE"
-```
-
-Configure `kubectl` to connect to the new cluster.
-
-```shell
-gcloud container clusters get-credentials "$CLUSTER" --zone "$ZONE"
 ```
 
 #### Clone this repo
@@ -126,13 +110,7 @@ The Application resource is defined by the
 community. The source code can be found on
 [github.com/kubernetes-sigs/application](https://github.com/kubernetes-sigs/application).
 
-### Install the Application
-
-Navigate to the `gcp-marketplace` directory:
-
-```shell
-cd gcp-marketplace/
-```
+## Install the Application
 
 ### Setting up the variables
 
