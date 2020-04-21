@@ -20,34 +20,37 @@ spec:
       volumes:
         - name: rsync-config-files
           emptyDir: {}
+        - name: setup-scripts
+          configMap:
+            name: setup-scripts
       initContainers:
-        - name: rsync-config-files
-          image: google/cloud-sdk:alpine
+        - name: setup
+          image: {{ template "gcloudsdk.image" . }}
           volumeMounts:
+            - name: setup-scripts
+              mountPath: /setup
             - name: rsync-config-files
-              mountPath: /config-external
+              mountPath: /config
           command: ['bash']
-          args: ['-c', 'gsutil -m rsync -d -r {{ .Values.configLocation }} /config-external']
+          args: ['/setup/setup_worker.sh']
       containers:
-        - name: nvindex-tape
-          image: "{{ .Values.imageNvindex }}"
+        - name: nvindex
+          image: {{ template "nvindex.image" . }}
           command: [ './nvindex-remote-service.sh' ]
           args: [
             '--nogl',
-            '--reference-viewer',
-            '--components',
             '--add', 'project_remote.prj',
             '-dice::network::mode', 'TCP_WITH_DISCOVERY',
-            '-dice::network::retention', '30',
+            '-dice::network::retention', '5',
             '-app::enable_fail_safety', 'yes',
-            '-dice::network::discovery_address', '$(NVINDEX_DISCOVERY_SERVICE_HOST):$(NVINDEX_DISCOVERY_SERVICE_PORT)',
+            '-dice::network::discovery_address', '{{ .Release.Name }}-viewer-0',
           ]
           env:
             - name: LICENSE_SEARCH_PATH
               value: "/config-external"
           volumeMounts:
           - name: rsync-config-files
-            mountPath: /config-external
+            mountPath: /config
           ports:
           - containerPort: 5555
           - containerPort: 10000
@@ -55,3 +58,9 @@ spec:
           resources:
             limits:
               nvidia.com/gpu: "{{ .Values.gpuCount }}"
+{{- if .Values.debug }}
+        - name: debug
+          image: gcr.io/google-containers/toolbox
+          command: ["bash"]
+          args: ["-c", "while true; do sleep 60s; done"]
+{{- end }}

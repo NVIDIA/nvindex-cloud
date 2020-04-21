@@ -20,7 +20,7 @@ spec:
   - name: http
     port: 80
     protocol: TCP
-    targetPort: 4444
+    targetPort: 8080
   {{ end }}
   selector:
     app.kubernetes.io/name: "{{ .Release.Name }}"

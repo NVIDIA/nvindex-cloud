@@ -1,9 +1,29 @@
 # from schema.yaml
 #
 name: nvindex
-imageNvindex: null
+publishedVersion: '2.2.1'
+
 nodeCount: 1
 gpuCount: 1
+
+# Image configuration:
+nvindex:
+  image:
+    registry: gcr.io
+    repository: nv-schlumberger/nvindex-tape-cloud
+    tag: 0.5
+
+nginx:
+  image:
+    registry: mirror.gcr.io
+    repository: library/nginx
+    tag: latest
+
+gcloudsdk:
+  image:
+    registry: gcr.io
+    repository: google.com/cloudsdktool/cloud-sdk
+    tag: alpine
 
 tls:
   base64EncodedPrivateKey: null
@@ -15,9 +35,7 @@ dataLocation: null
 configLocation: gs://nvindex-data-samples/config
 
 gcpMarketplace: true
+debug: false
 
 # NGINX is used as a proxy to the viewer.
 useNginx: true
-
-# No need to expose the web socket directly.
-exposeWebSocket: false

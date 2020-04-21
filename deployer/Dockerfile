@@ -32,3 +32,5 @@ COPY --from=build /tmp/nvindex.tar.gz /data/chart/
 COPY --from=build /tmp/test/nvindex.tar.gz /data-test/chart/
 COPY --from=build /tmp/apptest/schema.yaml /data-test/
 COPY --from=build /tmp/schema.yaml /data/
+
+#COPY deploy_with_sleep.sh /bin/deploy.sh

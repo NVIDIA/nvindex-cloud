@@ -1,0 +1,29 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: setup-scripts
+data:
+  setup_head_node.sh: |
+    #!/bin/bash
+
+    set -x
+
+    echo "Syncing config files ..."
+    gsutil -m rsync -d -r {{ .Values.configLocation }} /config
+
+    echo "Syncing scene files ..."
+    gsutil -m rsync -d -r -x ".*\/data\/*.*$" {{ .Values.dataLocation }} /scenes
+
+  setup_worker.sh: |
+    #!/bin/bash
+
+    set -x
+
+    echo "Syncing config files ..."
+    gsutil -m rsync -d -r {{ .Values.configLocation }} /config
+
+    echo -n "Waiting for head node to be available "
+    until nc -z "{{ .Release.Name }}-viewer-0" 5555; do
+      echo .
+      sleep 0.5
+    done

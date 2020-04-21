@@ -1,4 +1,44 @@
-application_api_version: v1beta1
+x-google-marketplace:
+  schemaVersion: v2
+  applicationApiVersion: v1beta1
+  publishedVersion: '2.2.1'
+  publishedVersionMetadata:
+    releaseNote: >-
+      Initial release.
+    releaseTypes:
+    - Feature
+    recommended: true
+
+  clusterConstraints:
+    resources:
+    - requests:
+        gpu:
+          nvidia.com/gpu: {}
+  images:
+    '':
+      properties:
+        nvindex.image.registry:
+          type: REGISTRY
+        nvindex.image.repository:
+            type: REPO_WITHOUT_REGISTRY
+        nvindex.image.tag:
+            type: TAG
+    nginx:
+      properties:
+        nginx.image.registry:
+          type: REGISTRY
+        nginx.image.repository:
+            type: REPO_WITHOUT_REGISTRY
+        nginx.image.tag:
+            type: TAG
+    gcloudsdk:
+      properties:
+        gcloudsdk.image.registry:
+          type: REGISTRY
+        gcloudsdk.image.repository:
+            type: REPO_WITHOUT_REGISTRY
+        gcloudsdk.image.tag:
+            type: TAG
 properties:
   name:
     type: string
@@ -12,11 +52,6 @@ properties:
     type: string
     x-google-marketplace:
       type: DEPLOYER_IMAGE
-  imageNvindex:
-    type: string
-    default: $REGISTRY:$TAG
-    x-google-marketplace:
-      type: IMAGE
   nodeCount:
     title: Number of nodes to span.
     type: integer
@@ -47,7 +82,6 @@ required:
 - name
 - namespace
 - deployerImage
-- imageNvindex
 - nodeCount
 - gpuCount
 - viewerGeneratedPassword
@@ -56,9 +90,3 @@ required:
 form:
 - widget: help
   description: My arbitrary <i>description</i>
-x-google-marketplace:
-  clusterConstraints:
-    resources:
-    - affinity:
-        simpleNodeAffinity:
-          type: REQUIRE_ONE_NODE_PER_REPLICA

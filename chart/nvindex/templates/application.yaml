@@ -7,15 +7,15 @@ metadata:
   annotations:
     kubernetes-engine.cloud.google.com/icon: >-
       data:image/png;base64,{{ .Files.Get "logo.png" | b64enc }}
-    marketplace.cloud.google.com/deploy-info: '{partner_id: "nvidia", product_id: "nvindex", partner_name: "NVIDIA"}'
+    marketplace.cloud.google.com/deploy-info: '{"partner_id": "nvidia", "product_id": "nvindex", "partner_name": "NVIDIA"}'
   labels:
     app.kubernetes.io/name: "{{ .Release.Name }}"
 spec:
   descriptor:
     type: IndeX
-    version: '0.1'
+    version: "{{ .Values.publishedVersion }}"
     description: |-
-      NVIDIA IndeX (TM) is a commercial 3D volumetric visualization SDK that allows
+      NVIDIA IndeX® is a commercial 3D volumetric visualization SDK that allows
       scientists and researchers to visualize and interact with massive data sets,
       make real-time modifications, and navigate to the most pertinent parts of
       the data, all in real-time, to gather better insights faster. IndeX leverages
@@ -53,6 +53,8 @@ spec:
   componentKinds:
   - group: apps/v1beta2
     kind: Deployment
+  - group: apps/v1beta2
+    kind: StatefulSet
   - group: batch/v1
     kind: Job
   - group: v1

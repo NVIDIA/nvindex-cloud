@@ -37,15 +37,15 @@ provided in the [Update your SSL certificate](#update-your-ssl-certificate)
 section.
 
 To achieve scaling of large volume data, NVIDIA IndeX runs in a cluster. For a cluster
-of N nodes, one node has the additional responsibility of serving the
-UI (viewer?). All the other nodes are workers. That means there is one viewer and N-1 workers
+of N pods, one node has the additional responsibility of serving the
+UI (viewer?). All the other pods are workers. That means there is one viewer and N-1 workers
 in a cluster of N nodes. In Kubernetes, this is modeled using two deployments:
-    - The viewer deployment: which has one replica.
+    - The viewer stateful set: which has one replica.
     - The worker deployment: which has N-1 replicas.
 
 For a cluster of size 1 (N=1), there is one viewer and zero workers.
 
-Two ClusterIP services are provided to set up and run the cluster.
+A ClusterIP service is provided to provide the worker nodes with a discovery node address.
 For public access, a LoadBalancer service is provided that points to the viewer
 pod.
 
@@ -76,11 +76,27 @@ environment by default.
 -   [git](https://git-scm.com/book/en/v2/Getting-Started-Installing-Git)
 -   [helm](https://helm.sh/)
 
-A Google Kubernetes Engine cluster with GPU nodes. Ideally, the GPU nodes should
-be within their own node pool.
+Configure `gcloud` as a Docker credential helper:
 
 ```shell
 gcloud auth configure-docker
+```
+
+#### Create a Google Kubernetes Engine cluster
+
+Create a new cluster from the command line:
+
+```shell
+export CLUSTER=nvindex-cluster
+export ZONE=us-west1-a
+
+gcloud container clusters create "$CLUSTER" --zone "$ZONE"
+```
+
+Configure `kubectl` to connect to the new cluster.
+
+```shell
+gcloud container clusters get-credentials "$CLUSTER" --zone "$ZONE"
 ```
 
 #### Clone this repo
@@ -103,14 +119,20 @@ command:
 kubectl apply -f "https://raw.githubusercontent.com/GoogleCloudPlatform/marketplace-k8s-app-tools/master/crd/app-crd.yaml"
 ```
 
-You need to run this command once.
+You need to run this command once per Kubernetes cluster.
 
 The Application resource is defined by the
 [Kubernetes SIG-apps](https://github.com/kubernetes/community/tree/master/sig-apps)
 community. The source code can be found on
 [github.com/kubernetes-sigs/application](https://github.com/kubernetes-sigs/application).
 
-## Install the Application
+### Install the Application
+
+Navigate to the `gcp-marketplace` directory:
+
+```shell
+cd gcp-marketplace/
+```
 
 ### Setting up the variables
 
@@ -125,7 +147,8 @@ Next, choose the number of nodes and how many GPUs you have allocated to one nod
 export NODE_COUNT=1
 export GPU_COUNT=1
 ```
-Note: It is possible to launch the application with zero (0) GPUs, but nothing will be rendered.
+Note: It is possible to launch the application with zero (0) GPUs, but an error
+will be shown and nothing will be rendered.
 
 A password has to be selected:
 ```shell
@@ -224,15 +247,15 @@ To connect to the viewer, there are two possibilities:
 - Another approach is to get the IP and credentials from the command line interface:
 
     ```shell
-        echo "Login: https://"$(kubectl get service/${NAME}-viewer --namespace ${NAMESPACE} --output jsonpath='{.status.loadBalancer.ingress[0].ip}')"
-        echo "User: nvindex"
+        echo "Login: https://"$(kubectl get service/${NAME}-viewer --namespace ${NAMESPACE} --output jsonpath='{.status.loadBalancer.ingress[0].ip}')" && \
+        echo "User: nvindex" && \
         echo "Password: "$(kubectl get secrets --namespace ${NAMESPACE} ${NAME}-password --output jsonpath='{.data.viewer-password}' | base64 -d -)"
     ```
 
 Both HTTP and HTTPS can be used.
 
-Once logged in, you should see the following page:
-![Successful launch](resources/successful_launch.png)
+Once logged in, you should see the NVIDIA IndeX application running, with a sample
+dataset selection list.
 
 For more information about using NVIDIA IndeX, refer to the
 [Using NVIDIA IndeX](#using-nvidia-index) section.
@@ -248,7 +271,7 @@ kubectl delefe -f "${NAME}_manifest.yaml"
 If you want to load and visualize your own data, you must:
 
 * Upload your data to a Google Storage Bucket.
-* Write a scene file describing where your data is located and how it should
+* Write a scene file configuring where your data is located and how it should
   be rendered.
 * Upload the scene data and meta-data to the same bucket as the data.
 
@@ -265,10 +288,10 @@ gs://your-bucket/root/example_dataset1/scene/
 
 The scene file and metadata must go into `gs://your-bucket/root/example_dataset1/scene`.
 The root directory `gs://your-bucket/root` is copied to the `/scenes`
-directory in the container. The application looks in the `/scenes` directory
-and scans for first level directories that contain the path `scene/scene.prj` and
-that path is a valid scene file config. All the directories matching this
-criteria are shown in the scene selector.
+directory in the container (except the data, which is accessed directly). The application
+looks into the `/scenes` directory and scans for first level directories that
+contain the path `scene/scene.prj` and that path contains a valid scene file.
+All the directories matching this criteria are shown in the scene selector.
 
 The data directory is not copied inside the container; the NVIDIA IndeX application
 reads it directly from the bucket. This means that the data can be stored

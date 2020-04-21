@@ -1,5 +1,5 @@
 apiVersion: apps/v1
-kind: Deployment
+kind: StatefulSet
 metadata:
   name: "{{ .Release.Name }}-viewer"
   labels:
@@ -7,6 +7,7 @@ metadata:
     app.kubernetes.io/component: viewer
 spec:
   replicas: 1
+  serviceName: "{{ .Release.Name }}-viewer-0"
   selector:
     matchLabels:
         app.kubernetes.io/name: "{{ .Release.Name }}"
@@ -36,15 +37,15 @@ spec:
           emptyDir: {}
         - name: rsync-config-files
           emptyDir: {}
-        - name: nvindex-conf-vol
+        - name: setup-scripts
           configMap:
-            name: nvindex-conf
+            name: setup-scripts
       initContainers:
           # Copy viewer files from IndeX container into a emptyDir that will
           # be used by the nginx container.
         {{ if .Values.useNginx }}
         - name: copy-viewer-files
-          image: "{{ .Values.imageNvindex }}"
+          image: {{ template "nvindex.image" . }}
           command: ['bash']
           args: ['-c', 'cp -R /opt/nvidia-index/demo/html5_viewer/* /output']
           volumeMounts:
@@ -53,7 +54,7 @@ spec:
         {{ if .Values.viewerGeneratedPassword }}
           # Generate a htpasswd file for basic auth based on generate password for nginx.
         - name: gen-htpasswd
-          image: "{{ .Values.imageNvindex }}"
+          image: {{ template "nvindex.image" . }}
           command: ['bash']
           # Generated passwd needs to be decoded from base64, encrypted and saved.
           args: ['-c', 'echo {{ .Values.viewerGeneratedPassword }} | echo nvindex:$(openssl passwd -apr1 -in -) > /htpasswd/htpasswd']
@@ -62,74 +63,72 @@ spec:
               mountPath: /htpasswd
         {{ end }} # if passwd enabled
         {{ end }} # if nginx enabled
-          # Sync (non-data) files from given dataLocation.
-        - name: rsync-scene-files
-          image: google/cloud-sdk:alpine
+        - name: setup
+          image: {{ template "gcloudsdk.image" . }}
           volumeMounts:
+            - name: setup-scripts
+              mountPath: /setup
+            - name: rsync-config-files
+              mountPath: /config
             - name: rsync-scene-files
               mountPath: /scenes
           command: ['bash']
-          args: ['-c', 'gsutil -m rsync -d -r -x ".*\/data\/*.*$" {{ .Values.dataLocation }} /scenes']
-        - name: rsync-config-files
-          image: google/cloud-sdk:alpine
-          volumeMounts:
-            - name: rsync-config-files
-              mountPath: /config-external
-          command: ['bash']
-          args: ['-c', 'gsutil -m rsync -d -r {{ .Values.configLocation }} /config-external']
+          args: ['/setup/setup_head_node.sh']
       containers:
-        - name: nvindex-tape
-          image: "{{ .Values.imageNvindex }}"
+        - name: nvindex
+          image: {{ template "nvindex.image" . }}
           command: [ './nvindex-viewer.sh' ]
           args: [
             '--nogl',
-            '--reference-viewer',
-            '--components',
             '-dice::network::mode', 'TCP_WITH_DISCOVERY',
-            '-dice::network::retention', '30',
+            '-dice::network::retention', '5',
             '-app::enable_fail_safety', 'yes',
-            '-dice::network::discovery_address', '0.0.0.0:$(NVINDEX_DISCOVERY_SERVICE_PORT)',
+            '-app::cluster_size', '{{ .Values.nodeCount }}',
+            '-dice::network::discovery_address', '0.0.0.0',
             '--add', "/config/extra.prj"
           ]
           env:
             - name: NVINDEX_DATA
               value: "{{ .Values.dataLocation }}"
             - name: LICENSE_SEARCH_PATH
-              value: "/config-external"
+              value: "/config"
           ports:
           - containerPort: 5555
           - containerPort: 10000
           - containerPort: 10001
-          - containerPort: 3333
-          - containerPort: 4444
+          - containerPort: 8080
           volumeMounts:
           - name: rsync-scene-files
             mountPath: /scenes
-          - name: nvindex-conf-vol
-            mountPath: /config
           - name: rsync-config-files
-            mountPath: /config-external
+            mountPath: /config
           resources:
             limits:
               nvidia.com/gpu: "{{ .Values.gpuCount }}"
-        {{ if .Values.useNginx }}
+        {{- if .Values.useNginx }}
         - name: nginx
-          image: nginx
+          image: {{ template "nginx.image" . }}
           volumeMounts:
           - name: viewer-files
             mountPath: /usr/share/nginx/html
           - name: nginx-conf-vol
             mountPath: /etc/nginx/nginx.conf
             subPath: nginx.conf
-          {{ if .Values.tls.base64EncodedPrivateKey }}
+          {{- if .Values.tls.base64EncodedPrivateKey }}
           - name: tls-certs-files
             mountPath: /root/certs
-          {{ end }}
-          {{ if .Values.viewerGeneratedPassword }}
+          {{- end }}
+          {{- if .Values.viewerGeneratedPassword }}
           - name: htpasswd-file
             mountPath: /htpasswd
-          {{ end }}
+          {{- end }}
           ports:
           - containerPort: 80
           - containerPort: 443
-        {{ end }}
+        {{- end }}
+{{- if .Values.debug }}
+        - name: debug
+          image: gcr.io/google-containers/toolbox
+          command: ["bash"]
+          args: ["-c", "while true; do sleep 60s; done"]
+{{- end }}
