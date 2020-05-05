@@ -303,8 +303,112 @@ When loading your own data, a scene configuration is required (`scene.prj`).
 This file and it's dependencies (colormaps, xac shaders, etc) have to be
 present in the same directory. 
 
+
+## Scene file
+
+The following text framed by the hashed lines represents a scene file that
+can be used as a starting point to load your own data. Just copy to a simple
+text file and then please rename the file to `svol-simple.prj`.
+
+```
+######################################################################
+#! index_app_project 0
+# -*- mode: Conf; -*-
+
+index::region_of_interest = 0 0 0 500 500 1500
+
+app::scene::root::children = sparse_volume_data
+
+#------------------------------------------------------------
+app::scene::sparse_volume_data::type     = static_scene_group
+app::scene::sparse_volume_data::children = svol_render_props svol_cmap xac_program seismic_uint8
+
+app::scene::xac_program::type        = rendering_kernel_program
+app::scene::xac_program::target      = volume_sample_program
+app::scene::xac_program::enabled     = true
+app::scene::xac_program::source_string << (END)
+class Volume_sample_program
+{
+    NV_IDX_VOLUME_SAMPLE_PROGRAM
+
+    const nv::index::xac::Colormap colormap = state.self.get_colormap();
+
+public:
+    NV_IDX_DEVICE_INLINE_MEMBER
+    void initialize() {}
+
+    NV_IDX_DEVICE_INLINE_MEMBER
+    int execute(
+        const Sample_info_self& sample_info,
+              Sample_output&    sample_output)
+    {
+        using namespace nv::index;
+
+        const auto& svol         = state.self;
+        const auto  svol_sampler = svol.generate_sampler<float,
+                                                         xac::Volume_filter_mode::TRILINEAR>(
+                                                            0u,
+                                                            sample_info.sample_context);
+
+        const float v = svol_sampler.fetch_sample(sample_info.sample_position_object_space);
+
+        sample_output.set_color(colormap.lookup(v));
+
+        return NV_IDX_PROG_OK;
+    }
+};
+(END)
+
+# setup rendering properties
+app::scene::svol_render_props::type                 = sparse_volume_rendering_properties
+app::scene::svol_render_props::filter_mode          = trilinear
+app::scene::svol_render_props::sampling_distance    = 0.5
+
+# map_type : procedural, lookup_table
+app::scene::svol_cmap::type                 = colormap
+app::scene::svol_cmap::map_index            = 0
+app::scene::svol_cmap::map_type             = lookup_table
+app::scene::svol_cmap::domain               = 0.0 1.0
+app::scene::svol_cmap::domain_boundary_mode = clamp_to_edge
+
+# The volume type. A sparse volume is able to manage dense and sparse volume datasets as well as multi-resolution data.
+app::scene::seismic_uint8::type                        = sparse_volume
+
+# This option selects a specific data importer. The importer reads raw voxel data in a given order (see below).
+app::scene::seismic_uint8::importer                    = raw
+
+# The voxel format. The present dataset's voxels are of type uint8. Currently, valid types are uint8, uint16, sint16, rgba8, float32.
+app::scene::seismic_uint8::voxel_format                = uint8
+
+# By default, raw data is assumed to be stored in z-first/x-last order. In those cases, the option
+# 'app::scene::seismic_uint8::zyx_to_xyz' needs to be set to 'true'.
+# The present dataset is assumed to be in x-first/z-last order:
+app::scene::seismic_uint8::convert_zyx_to_xyz                  = false
+
+# The size of the dataset in the datasets local space:
+app::scene::seismic_uint8::size                        = 500 500 1500
+
+# The bounding box defines the space the volume is defined in:
+app::scene::seismic_uint8::bbox                         = 0 0 0 500 500 1500
+
+# Import directory:
+# app::scene::seismic_uint8::input_directory             = <YOUR_DIRECTORY>
+app::scene::seismic_uint8::input_directory             = /h/my/dataset/directory
+
+# Name of the file:
+#app::scene::seismic_uint8::input_file_base_name        = <YOUR_FILE_NAME_WITHOUT_FILE_EXTENSION>
+app::scene::seismic_uint8::input_file_base_name        = my_file_name
+
+# File extension:
+app::scene::seismic_uint8::input_file_extension        = .extension
+
+# Cache data on disk for future accelerated data imports:
+app::scene::seismic_uint8::cache                       = false
+```
+
 Note: In this case, the data is an exception. It can
 be stored in any path specified in the project file.
 
-A good example of a scene file is the default scene found
-under `gs://nvindex-data-samples/scenessupernova_ncsa_small/scene/scene.prj`.
+Some examples scene files can be found in the [bucket](gs://nvindex-data-samples/scenes).
+
+
