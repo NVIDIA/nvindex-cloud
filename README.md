@@ -317,6 +317,8 @@ text file and then please rename the file to `svol-simple.prj`.
 
 index::region_of_interest = 0 0 0 500 500 1500
 
+app::scene::info::name = My Scene
+
 app::scene::root::children = sparse_volume_data
 
 #------------------------------------------------------------
@@ -409,6 +411,7 @@ app::scene::seismic_uint8::cache                       = false
 Note: In this case, the data is an exception. It can
 be stored in any path specified in the project file.
 
-Some examples scene files can be found in the [bucket](gs://nvindex-data-samples/scenes).
+Some examples scene files can be found in the sample dataset bucket:
+`gs://nvindex-data-samples/scenes`.
 
 
