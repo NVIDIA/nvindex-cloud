@@ -303,12 +303,10 @@ When loading your own data, a scene configuration is required (`scene.prj`).
 This file and it's dependencies (colormaps, xac shaders, etc) have to be
 present in the same directory. 
 
-
-## Scene file
-
-The following text framed by the hashed lines represents a scene file that
-can be used as a starting point to load your own data. Just copy to a simple
-text file and then please rename the file to `svol-simple.prj`.
+The below section represents a skeleton scene file that can be used as a
+starting point to load your own data. Just copy to a simple text file
+and then upload it to the Google Storage bucket (as described in the previous
+section).
 
 ```
 #! index_app_project 0
