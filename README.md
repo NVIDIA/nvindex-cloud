@@ -311,7 +311,6 @@ can be used as a starting point to load your own data. Just copy to a simple
 text file and then please rename the file to `svol-simple.prj`.
 
 ```
-######################################################################
 #! index_app_project 0
 # -*- mode: Conf; -*-
 
@@ -323,7 +322,7 @@ app::scene::root::children = sparse_volume_data
 
 #------------------------------------------------------------
 app::scene::sparse_volume_data::type     = static_scene_group
-app::scene::sparse_volume_data::children = svol_render_props svol_cmap xac_program seismic_uint8
+app::scene::sparse_volume_data::children = svol_render_props svol_cmap xac_program sparse_volume_uint8
 
 app::scene::xac_program::type        = rendering_kernel_program
 app::scene::xac_program::target      = volume_sample_program
@@ -374,38 +373,38 @@ app::scene::svol_cmap::domain               = 0.0 1.0
 app::scene::svol_cmap::domain_boundary_mode = clamp_to_edge
 
 # The volume type. A sparse volume is able to manage dense and sparse volume datasets as well as multi-resolution data.
-app::scene::seismic_uint8::type                        = sparse_volume
+app::scene::sparse_volume_uint8::type                        = sparse_volume
 
 # This option selects a specific data importer. The importer reads raw voxel data in a given order (see below).
-app::scene::seismic_uint8::importer                    = raw
+app::scene::sparse_volume_uint8::importer                    = raw
 
 # The voxel format. The present dataset's voxels are of type uint8. Currently, valid types are uint8, uint16, sint16, rgba8, float32.
-app::scene::seismic_uint8::voxel_format                = uint8
+app::scene::sparse_volume_uint8::voxel_format                = uint8
 
 # By default, raw data is assumed to be stored in z-first/x-last order. In those cases, the option
-# 'app::scene::seismic_uint8::zyx_to_xyz' needs to be set to 'true'.
+# 'app::scene::sparse_volume_uint8::zyx_to_xyz' needs to be set to 'true'.
 # The present dataset is assumed to be in x-first/z-last order:
-app::scene::seismic_uint8::convert_zyx_to_xyz                  = false
+app::scene::sparse_volume_uint8::convert_zyx_to_xyz                  = false
 
 # The size of the dataset in the datasets local space:
-app::scene::seismic_uint8::size                        = 500 500 1500
+app::scene::sparse_volume_uint8::size                        = 500 500 1500
 
 # The bounding box defines the space the volume is defined in:
-app::scene::seismic_uint8::bbox                         = 0 0 0 500 500 1500
+app::scene::sparse_volume_uint8::bbox                         = 0 0 0 500 500 1500
 
 # Import directory:
-# app::scene::seismic_uint8::input_directory             = <YOUR_DIRECTORY>
-app::scene::seismic_uint8::input_directory             = /h/my/dataset/directory
+# app::scene::sparse_volume_uint8::input_directory             = <YOUR_DIRECTORY>
+app::scene::sparse_volume_uint8::input_directory             = /h/my/dataset/directory
 
 # Name of the file:
-#app::scene::seismic_uint8::input_file_base_name        = <YOUR_FILE_NAME_WITHOUT_FILE_EXTENSION>
-app::scene::seismic_uint8::input_file_base_name        = my_file_name
+#app::scene::sparse_volume_uint8::input_file_base_name        = <YOUR_FILE_NAME_WITHOUT_FILE_EXTENSION>
+app::scene::sparse_volume_uint8::input_file_base_name        = my_file_name
 
 # File extension:
-app::scene::seismic_uint8::input_file_extension        = .extension
+app::scene::sparse_volume_uint8::input_file_extension        = .extension
 
 # Cache data on disk for future accelerated data imports:
-app::scene::seismic_uint8::cache                       = false
+app::scene::sparse_volume_uint8::use_cache                       = false
 ```
 
 Note: In this case, the data is an exception. It can

@@ -3,7 +3,7 @@ APP_ID ?= marketplace/nvindex
 
 # Track should be the major.minor of RELEASE.
 TRACK ?= 2.2
-RELEASE ?= 2.2.1
+RELEASE ?= 2.2.2
 
 NODE_COUNT ?= 1
 # GPU count is 0 by default to allow smoke tests to run
