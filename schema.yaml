@@ -1,7 +1,7 @@
 x-google-marketplace:
   schemaVersion: v2
   applicationApiVersion: v1beta1
-  publishedVersion: '2.2.2'
+  publishedVersion: '2.2.3'
   publishedVersionMetadata:
     releaseNote: >-
       Initial release.
@@ -89,4 +89,4 @@ required:
 - dataLocation
 form:
 - widget: help
-  description: My arbitrary <i>description</i>
+  description: Please refer to the <a href="https://github.com/NVIDIA/nvindex-cloud/blob/master/doc/datasets.md">dataset documentation page</a> for sizing information.

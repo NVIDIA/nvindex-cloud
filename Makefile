@@ -3,11 +3,12 @@ APP_ID ?= marketplace/nvindex
 
 # Track should be the major.minor of RELEASE.
 TRACK ?= 2.2
-RELEASE ?= 2.2.2
+RELEASE ?= 2.2.3
 
 NODE_COUNT ?= 1
 # GPU count is 0 by default to allow smoke tests to run
 GPU_COUNT ?= 0
+DATA_LOCATION ?= gs://nvindex-data-samples/scenes
 
 GCS_URL ?= gs://nvindex-data-samples
 REGISTRY ?= gcr.io/nv-schlumberger
@@ -27,7 +28,8 @@ APP_PARAMETERS ?= { \
   "name": "$(NAME)", \
   "namespace": "$(NAMESPACE)", \
   "nodeCount": $(NODE_COUNT), \
-  "gpuCount": $(GPU_COUNT) \
+  "gpuCount": $(GPU_COUNT), \
+  "dataLocation": "$(DATA_LOCATION)" \
 }
 
 TESTER_IMAGE ?= $(REGISTRY)/$(APP_ID)/tester:$(RELEASE)

@@ -1,7 +1,7 @@
 # from schema.yaml
 #
 name: nvindex
-publishedVersion: '2.2.2'
+publishedVersion: '2.2.3'
 
 nodeCount: 1
 gpuCount: 1
