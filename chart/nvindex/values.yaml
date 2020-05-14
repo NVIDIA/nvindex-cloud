@@ -31,7 +31,7 @@ tls:
 
 viewerGeneratedPassword: null
 
-dataLocation: null
+dataLocation: gs://nvindex-data-samples/scenes
 configLocation: gs://nvindex-data-samples/config
 
 gcpMarketplace: true

@@ -79,6 +79,7 @@ A running Kubernetes cluster with NVIDIA GPUs is required. Otherwise the NVIDIA
 IndeX Application will not be able to render.
 
 Please refer to the [GKE GPU Guide](https://cloud.google.com/kubernetes-engine/docs/how-to/gpus)
+for more information.
 
 #### Install the Application resource definition
 
@@ -101,37 +102,46 @@ community. The source code can be found on
 
 ### Install the Application
 
-#### Setting up the variables
+The application is installed by expanding a Helm chart as shown in the next section.
 
-First, set the name and namespace:
+### Expanding the manifest template
+
+Use `helm template` to expand the template. It is recommended that you save the
+expanded manifest file for future updates to the application. Here's an example
+of expanding the template:
+
 ```shell
-export NAME=my-nvindex-app
-export NAMESPACE=default
+helm template chart/nvindex \
+    --name nvindex-app \
+    --set "name=nvindex-app" \
+    --set "nodeCount=2" \
+    --set "gpuCount=8" \
+    --set "viewerGeneratedPassword=testme123" \
+    --set "tls.base64EncodedPrivateKey=$TLS_CERTIFICATE_KEY" \
+    --set "tls.base64EncodedCertificate=$TLS_CERTIFICATE_CRT" \
+    --set "dataLocation=$NVINDEX_DATA_LOCATION" \
+    --set "imageNvindex=$NVINDEX_IMAGE" \
+    > nvindex_app_manifest.yaml
 ```
 
-Next, choose the number of nodes and how many GPUs you have allocated to one node:
-```shell
-export NODE_COUNT=1
-export GPU_COUNT=1
-```
-Note: It is possible to launch the application with zero (0) GPUs, but an error
-will be shown and nothing will be rendered.
+Here are the relevant template parameters:
 
-A password has to be selected:
-```shell
-export NVINDEX_PASSWORD=testpassword
-```
-The user is always `nvindex`.
+  * Mandatory parameters:
+    - name: Name of the application.
+    - nodeCount: Number of nodes (n = 1 x viewer + (n-1) x workers) for the deployment
+    - gpuCount: Number of gpus per deployment replica.
+    - viewerGeneratedPassword: The password to be used for connecting to the viewer.
 
-default To load your own dataset, see the [Loading your own data](#loading-your-own-data)
-section.
+  * Optional parameters:
+    - tls.base64EncodedCertificateKey: sets TLS Certificate. See the [TLS certificate section](#TLS-certificates)
+    - tls.base64EncodedPrivateKey: sets TLS Private Key. See the [TLS certificate section](#TLS-certificates)
+    - dataLocation: Path to a Google Storage Bucket that contains a custom dataset.
+      More in the [Loading your own Data](#loading-your-own-data) section.
 
-Configure the launcher image:
-```shell
-export NVINDEX_IMAGE="https://marketplace.gcr.io/nvidia-nvidx/nvindex:2.2.3"
-```
+### TLS certificates
 
-IF you have your own certificate, skip this step. Otherwise create a new certificate:
+If you have your own certificate you can use that. Otherwise here's how to create
+a test certificate:
 
 ```shell
 openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
@@ -148,80 +158,51 @@ export TLS_CERTIFICATE_KEY="$(cat /tmp/tls.key | base64)"
 export TLS_CERTIFICATE_CRT="$(cat /tmp/tls.crt | base64)"
 ```
 
-#### Create a namespace in your Kubernetes cluster
-
-If you use a different namespace than `default`, run the command below to create
-a new namespace:
-
-```shell
-kubectl create namespace "$NAMESPACE"
-```
-
-### Expand the manifest template
-
-Use `helm template` to expand the template. It is recommended that you save the
-expanded manifest file for future updates to the application.
-
-```shell
-helm template chart/nvindex \
-    --name $NAME \
-    --set "name=$NAME" \
-    --set "imageNvindex=$NVINDEX_IMAGE" \
-    --set "nodeCount=$NODE_COUNT" \
-    --set "gpuCount=$GPU_COUNT" \
-    --set "tls.base64EncodedPrivateKey=$TLS_CERTIFICATE_KEY" \
-    --set "tls.base64EncodedCertificate=$TLS_CERTIFICATE_CRT" \
-    --set "viewerGeneratedPassword=$NVINDEX_PASSWORD" \
-    --set "dataLocation=$NVINDEX_DATA_LOCATION" \
-    > ${NAME}_manifest.yaml
-```
-
-#### Apply the manifest to your Kubernetes cluster
+#### Install the application - apply the manifest
 
 Use `kubectl` to apply the manifest to your Kubernetes cluster:
 
 ```shell
-kubectl apply -f "${NAME}_manifest.yaml" --namespace "${NAMESPACE}"
+kubectl apply -f "nvindex_app_manifest.yaml" --namespace "${NAMESPACE}"
 ```
+
 After the deployment is ready, check that the viewer service has a external
 IP assigned and proceed to the next section.
+
+*Optional*: It's possible to create the application in a namespace:
+
+```shell
+kubectl create namespace my-namespace
+kubectl apply -f "nvindex_app_manifest.yaml" --namespace my-namespace
+```
 
 #### Connecting to the NVIDIA IndeX viewer
 
 By default, the IndeX viewer is protected by basic HTTP authentication. The
 username is `nvindex` and the password is stored in the password secret object.
 
-To connect to the viewer, there are two possibilities:
+The Application is available in the Google Cloud Console in the  Application
+section of the Kubernetes Engine. You will get connection information on that
+page.
 
-- Go to the Application section of the Kubernetes cluster. Select the
-  application. There you should see the external IP at which the viewer
-  is accessible, the username and the password.
-  To get the GCP Console URL for your application, run the following command:
+You can also query it from the command line by getting the external ip of the
+load balancer service.
 
-   ```shell
-        echo "https://console.cloud.google.com/kubernetes/application/${ZONE}/${CLUSTER}/${NAMESPACE}/${NAME}"
-   ```
+HTTP is available. HTTPS is available only if TLS was configured.
 
-- Another approach is to get the IP and credentials from the command line interface:
-
-    ```shell
-        echo "Login: https://"$(kubectl get service/${NAME}-viewer --namespace ${NAMESPACE} --output jsonpath='{.status.loadBalancer.ingress[0].ip}')" && \
-        echo "User: nvindex" && \
-        echo "Password: "$(kubectl get secrets --namespace ${NAMESPACE} ${NAME}-password --output jsonpath='{.data.viewer-password}' | base64 -d -)"
-    ```
-
-Both HTTP and HTTPS can be used.
-
-Once logged in, you should see the NVIDIA IndeX application running, with a sample
-dataset selection list.
+Once logged in, you should see the NVIDIA IndeX application running, with a
+sample dataset selection list.
 
 For more information about using NVIDIA IndeX, refer to the
 [Using NVIDIA IndeX](#using-nvidia-index) section.
 
 ### Delete the Application from the Kubernetes cluster
 
+To stop the application, just remove the Kubernetes objects from the cluster,
+by using the generated manifest:
+
 ```shell
-kubectl delefe -f "${NAME}_manifest.yaml"
+kubectl delefe -f "nvindex_app_manifest.yaml"
 ```
 
 # Loading your own data
