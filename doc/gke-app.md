@@ -15,7 +15,7 @@ document.
 
 ## Architecture 
 
-![Architecture diagram](doc/nvindex-k8s-app-architecture.png)
+![Architecture diagram](nvindex-k8s-app-architecture.png)
 
 The application starts an NVIDIA IndeX cluster instance, available from the
 exposed viewer service on HTPP and HTTPS. The session is protected by a user ID
