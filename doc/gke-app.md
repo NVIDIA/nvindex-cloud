@@ -78,8 +78,32 @@ gcloud auth configure-docker
 A running Kubernetes cluster with NVIDIA GPUs is required. Otherwise the NVIDIA
 IndeX Application will not be able to render.
 
-Please refer to the [GKE GPU Guide](https://cloud.google.com/kubernetes-engine/docs/how-to/gpus)
-for more information.
+Furthermore, NVIDIA IndeX requires CUDA 10.2 compatible drivers to run.
+
+The [GKE GPU Guide](https://cloud.google.com/kubernetes-engine/docs/how-to/gpus)
+contains more information.
+
+#### Enabling NVIDIA GPUs with in GKE
+
+To enable the NVIDIA GPUs in the cluster, the NVIDIA device drivers need to be
+installed. This is done by applying a DaemonSet to the cluster:
+
+- For COS (the default in GKE):
+
+```shell
+kubectl apply -f "https://raw.githubusercontent.com/NVIDIA/nvindex-cloud/master/resources/daemonset-cos-nv.yaml
+```
+
+- For Ubuntu:
+
+```shell
+kubectl apply -f "https://raw.githubusercontent.com/NVIDIA/nvindex-cloud/master/resources/daemonset-ubuntu-nv.yaml
+```
+
+The above DaemonSets are configured to install a newer NVIDIA driver that supports
+CUDA 10.2. The [GKE GPU Guide](https://cloud.google.com/kubernetes-engine/docs/how-to/gpus)
+links to DaemonSets that install CUDA 10.1 compatible drivers.
+
 
 #### Install the Application resource definition
 
@@ -192,9 +216,6 @@ HTTP is available. HTTPS is available only if TLS was configured.
 
 Once logged in, you should see the NVIDIA IndeX application running, with a
 sample dataset selection list.
-
-For more information about using NVIDIA IndeX, refer to the
-[Using NVIDIA IndeX](#using-nvidia-index) section.
 
 ### Delete the Application from the Kubernetes cluster
 
@@ -344,10 +365,5 @@ app::scene::sparse_volume_uint8::input_file_extension        = .extension
 app::scene::sparse_volume_uint8::use_cache                       = false
 ```
 
-Note: In this case, the data is an exception. It can
-be stored in any path specified in the project file.
-
 Some examples scene files can be found in the sample dataset bucket:
 `gs://nvindex-data-samples/scenes`.
-
-

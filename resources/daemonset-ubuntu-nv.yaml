@@ -1,0 +1,93 @@
+# Copyright 2017 Google Inc. All rights reserved.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+apiVersion: apps/v1
+kind: DaemonSet
+metadata:
+  name: nvidia-driver-installer
+  namespace: kube-system
+  labels:
+    k8s-app: nvidia-driver-installer
+spec:
+  selector:
+    matchLabels:
+      k8s-app: nvidia-driver-installer
+  updateStrategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        name: nvidia-driver-installer
+        k8s-app: nvidia-driver-installer
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: cloud.google.com/gke-accelerator
+                operator: Exists
+      tolerations:
+      - operator: "Exists"
+      volumes:
+      - name: dev
+        hostPath:
+          path: /dev
+      - name: nvidia-install-dir-host
+        hostPath:
+          path: /home/kubernetes/bin/nvidia
+      - name: root-mount
+        hostPath:
+          path: /
+      - name: sources-list
+        # Mount local sources.list to make sure same kernel headers are used.
+        hostPath:
+          path: /etc/apt/sources.list
+          type: File
+      - name: kernel-modules
+        # Bind mount modules in container to allow module dependencies to be handled correctly.
+        hostPath:
+          path: /lib/modules
+      initContainers:
+      - image: "gcr.io/google-containers/ubuntu-nvidia-driver-installer@sha256:86990c870fdc3e710393f8c992337715254012707d46e2f03233d2e10977c232"
+        name: nvidia-driver-installer
+        resources:
+          requests:
+            cpu: 0.15
+        securityContext:
+          privileged: true
+        env:
+          - name: NVIDIA_INSTALL_DIR_HOST
+            value: /home/kubernetes/bin/nvidia
+          - name: NVIDIA_INSTALL_DIR_CONTAINER
+            value: /usr/local/nvidia
+          - name: ROOT_MOUNT_DIR
+            value: /root
+          - name: NVIDIA_DRIVER_VERSION
+            # CUDA 10.1
+            value: "440.33.01"
+        volumeMounts:
+        - name: nvidia-install-dir-host
+          mountPath: /usr/local/nvidia
+        - name: dev
+          mountPath: /dev
+        - name: root-mount
+          mountPath: /root
+        - name: sources-list
+          mountPath: /etc/apt/sources.list
+        - name: kernel-modules
+          mountPath: /lib/modules
+      containers:
+      - image: "gcr.io/google-containers/pause:2.0"
+        name: pause
