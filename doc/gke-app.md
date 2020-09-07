@@ -45,6 +45,11 @@ Loading your own data is covered in the [Loading your own data](#loading-your-ow
 
 # Installation
 
+## Provisioning a Kubernetes Cluster with GKE
+
+A Kubernetes cluster in GKE is a pre-requuisite. Please follow the [GKE Provisioning](doc/gke-provisioning.md)
+guide to get a demo cluster up and running.
+
 ## Quick Install using Google Cloud Marketplace
 
 For a quick look at NVIDIA IndeX, you can launch it directly from the Google
@@ -53,7 +58,7 @@ Cloud Marketplace. Follow the
 
 Before launching, make sure that you have NVIDIA GPUs available in the cluster.
 
-## Command line instructions
+## Command Line Installation
 
 ### Prerequisites
 
@@ -72,57 +77,6 @@ Configure `gcloud` as a Docker credential helper:
 ```shell
 gcloud auth configure-docker
 ```
-
-#### Kubernetes Cluster
-
-A running Kubernetes cluster with NVIDIA GPUs is required. Otherwise the NVIDIA
-IndeX Application will not be able to render.
-
-Furthermore, NVIDIA IndeX requires CUDA 10.2 compatible drivers to run.
-
-The [GKE GPU Guide](https://cloud.google.com/kubernetes-engine/docs/how-to/gpus)
-contains more information.
-
-#### Enabling NVIDIA GPUs with in GKE
-
-To enable the NVIDIA GPUs in the cluster, the NVIDIA device drivers need to be
-installed. This is done by applying a DaemonSet to the cluster:
-
-- For COS (the default in GKE):
-
-```shell
-kubectl apply -f "https://raw.githubusercontent.com/NVIDIA/nvindex-cloud/master/resources/daemonset-cos-nv.yaml
-```
-
-- For Ubuntu:
-
-```shell
-kubectl apply -f "https://raw.githubusercontent.com/NVIDIA/nvindex-cloud/master/resources/daemonset-ubuntu-nv.yaml
-```
-
-The above DaemonSets are configured to install a newer NVIDIA driver that supports
-CUDA 10.2. The [GKE GPU Guide](https://cloud.google.com/kubernetes-engine/docs/how-to/gpus)
-links to DaemonSets that install CUDA 10.1 compatible drivers.
-
-
-#### Install the Application resource definition
-
-Additionally, the Application CRD needs to be installed
-An Application resource is a collection of individual Kubernetes components,
-such as Services, Deployments, and so on, that you can manage as a group.
-
-To set up your cluster to understand Application resources, run the following
-command:
-
-```shell
-kubectl apply -f "https://raw.githubusercontent.com/GoogleCloudPlatform/marketplace-k8s-app-tools/master/crd/app-crd.yaml"
-```
-You need to run this command once per Kubernetes cluster.
-
-The Application resource is defined by the
-[Kubernetes SIG-apps](https://github.com/kubernetes/community/tree/master/sig-apps)
-community. The source code can be found on
-[github.com/kubernetes-sigs/application](https://github.com/kubernetes-sigs/application).
 
 ### Install the Application
 

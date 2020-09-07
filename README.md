@@ -15,3 +15,4 @@ can also be found here.
 
 For sample dataset information, please refer to the [dataset guide](doc/datasets.md).
 
+The general NVIDIA IndeX documentation can be found on [NVIDIA Ray Tracing Documentation](https://raytracing-docs.nvidia.com).
