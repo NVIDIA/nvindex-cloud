@@ -10,8 +10,9 @@ data.
 
 To learn more about NVIDIA IndeX, go to [page](https://developer.nvidia.com/index).
 
-Information about the [NVIDIA IndeX Application from Google Cloud Marketplace](doc/gke-app.md)
-can also be found here.
+This repository contains information about:
+* The [NVIDIA IndeX Applicaton from AWS Marketplace](doc/aws.md)
+* The [NVIDIA IndeX Application from Google Cloud Marketplace](doc/gke-app.md)
 
 For sample dataset information, please refer to the [dataset guide](doc/datasets.md).
 

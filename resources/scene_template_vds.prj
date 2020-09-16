@@ -1,0 +1,38 @@
+#! index_app_project 0
+# -*- mode: Conf; coding: utf-8; -*-
+
+# TODO: set region of interest bounding box extents
+index::region_of_interest                               =  0 0 0 X Y Z
+
+# Create scene hierarchy:
+app::scene::root::children                              = group_sparse_vol
+
+app::scene::group_sparse_vol::type                      = static_scene_group
+app::scene::group_sparse_vol::children                  = sparse_vol_colormap sparse_vol_vds
+
+# Define scene nodes:
+
+# Enable the OpenVDS plugin.
+index::app::plugins::vds_importer::enabled              = true
+
+app::scene::sparse_vol_vds::type                        = sparse_volume
+app::scene::sparse_vol_vds::importer                    = nv::index::plugin::vds_importer.Sparse_volume_importer
+
+# TODO: fill bucket
+app::scene::sparse_vol_vds::input_path                  = s3://YOUR_BUCKET/DIR/DATA.raw
+# TODO: add OpenVDS connection string for the bucket.
+app::scene::sparse_vol_vds::connection                  = Region=us-west-2
+
+# Optional: shows file loading in a more verbose way
+app::scene::sparse_vol_vds::is_verbose                  = true
+ 
+# TODO: set volume bounding box extents
+app::scene::sparse_vol_vds::bbox                        = 0 0 0 X Y Z
+
+# TODO: set voxel format
+app::scene::sparse_vol_vds::voxel_format                = uint8
+
+app::scene::sparse_vol_colormap::type                   = colormap
+app::scene::sparse_vol_colormap::map_index              = 0
+app::scene::sparse_vol_colormap::map_type               = lookup_table
+app::scene::sparse_vol_colormap::domain                 = 0.0 1.0

@@ -1,0 +1,199 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Launch a single EC2 GPU instance with Nvidia IndeX AMI in a public subnet in us-west-2 region. 
+
+Parameters:
+  KeyName: 
+      Description : Name of an existing EC2 KeyPair to enable SSH access to the instance
+      Type: AWS::EC2::KeyPair::KeyName
+      ConstraintDescription : Must be the name of an existing EC2 KeyPair
+  InstanceType:
+    Description: Class of EC2 GPU instance used to run IndeX
+    Type: String
+    Default: p3.8xlarge
+    AllowedValues: [ p3.2xlarge, p3.8xlarge, p3.16xlarge, p3dn.24xlarge, g4dn.xlarge, g4dn.2xlarge, g4dn.4xlarge, g4dn.8xlarge, g4dn.16xlarge, g4dn.12xlarge, g4dn.metal ]
+    ConstraintDescription: Please choose a valid instance type.
+  PasswordDCV:
+    Description: Password for logging into NICE DCV session.
+    Type: String
+    Default: IndeXonAw$
+
+
+Mappings:
+ SubnetConfig:
+   VPC:
+    CIDR: '10.0.0.0/16'
+   Public:
+    CIDR: '10.0.0.0/24'
+    
+Resources:
+  VPC:
+    Type: AWS::EC2::VPC
+    Properties:
+      EnableDnsSupport: true
+      EnableDnsHostnames: true
+      CidrBlock: !FindInMap ['SubnetConfig', 'VPC', 'CIDR']
+      Tags:
+       - Key: Name
+         Value: !Ref 'AWS::StackName'
+
+  PublicSubnet:
+    Type: AWS::EC2::Subnet
+    Properties:
+      AvailabilityZone:
+         Fn::Select:
+         - 0
+         - Fn::GetAZs: {Ref: 'AWS::Region'}
+      VpcId: !Ref 'VPC'
+      CidrBlock: !FindInMap ['SubnetConfig', 'Public', 'CIDR']
+      MapPublicIpOnLaunch: true
+      Tags:
+        - Key: Name
+          Value: !Sub '${AWS::StackName} Public Subnet'
+
+  InternetGateway:
+    Type: AWS::EC2::InternetGateway
+    Properties:
+      Tags:
+        - Key: Name
+          Value: !Ref 'AWS::StackName'
+
+  GatewayAttachement:
+    Type: AWS::EC2::VPCGatewayAttachment
+    Properties:
+      VpcId: !Ref 'VPC'
+      InternetGatewayId: !Ref 'InternetGateway'
+
+  PublicRouteTable:
+    Type: AWS::EC2::RouteTable
+    Properties:
+      VpcId: !Ref 'VPC'
+
+  PublicRoute:
+    Type: AWS::EC2::Route
+    DependsOn: GatewayAttachement
+    Properties:
+      RouteTableId: !Ref 'PublicRouteTable'
+      DestinationCidrBlock: '0.0.0.0/0'
+      GatewayId: !Ref 'InternetGateway'
+
+  PublicSubnetRouteTableAssociation:
+    Type: AWS::EC2::SubnetRouteTableAssociation
+    Properties:
+      SubnetId: !Ref PublicSubnet
+      RouteTableId: !Ref PublicRouteTable
+
+  EC2Instance:
+    Type: AWS::EC2::Instance
+    Properties:
+      InstanceType: !Ref 'InstanceType'
+      SubnetId: !Ref 'PublicSubnet'
+      SecurityGroupIds: [!GetAtt 'InstanceSecurityGroup.GroupId']
+      KeyName: !Ref 'KeyName'
+      ImageId: ami-0815a37bea5aa89e4
+      IamInstanceProfile: !Ref 'InstanceProfile'
+      Tags:
+         - Key: "Name"
+           Value: !Ref 'AWS::StackName'
+      UserData:
+        Fn::Base64: !Sub |
+            #!/bin/bash -xe
+
+            # Install DCV:
+            bash /opt/scripts/setup-dcv.sh ${PasswordDCV}
+ 
+  # A security group for the EC2 hosts 
+  InstanceSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Enable SSH access, IndeX and DCV ports
+      VpcId: !Ref 'VPC' 
+      SecurityGroupIngress:
+      - IpProtocol: tcp
+        FromPort: 22
+        ToPort: 22
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 8080
+        ToPort: 8080
+        CidrIp: 0.0.0.0/0
+      - IpProtocol: tcp
+        FromPort: 8443
+        ToPort: 8443
+        CidrIp: 0.0.0.0/0
+
+  InstanceProfile:
+    Type: AWS::IAM::InstanceProfile
+    Properties:
+      Path: "/"
+      Roles:
+      - Ref: 'InstanceRole'
+
+  S3BucketsPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: S3BucketsPolicy
+      PolicyDocument:
+        Statement:
+        - Effect: Allow
+          Action:
+          - 's3:ListBucket'
+          Resource: arn:aws:s3:::nvindex-datasets-us-west2
+        - Effect: Allow
+          Action:
+          - 's3:GetObject'
+          Resource: 
+          - arn:aws:s3:::nvindex-datasets-us-west2/*
+          - arn:aws:s3:::dcv-license.us-west-2/*
+          - arn:aws:s3:::nvindex-util/*
+      Roles:
+        - Ref: 'InstanceRole'
+
+  MeteringPolicy:
+    Type: AWS::IAM::Policy
+    Properties:
+      PolicyName: MeteringPolicy
+      PolicyDocument:
+        Statement:
+        - Effect: Allow
+          Resource: '*'
+          Action:
+            - aws-marketplace:MeterUsage
+      Roles:
+        - Ref: 'InstanceRole'
+
+  InstanceRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Principal:
+            Service:
+            - ec2.amazonaws.com
+          Action:
+          - sts:AssumeRole
+      Path: "/"
+
+# These are the values output by the CloudFormation template. Be careful
+# about changing any of them, because of them are exported with specific
+# names so that the other task related CF templates can use them.
+Outputs:
+  VPC:
+    Description: A reference to the created VPC
+    Value: !Ref VPC
+
+  PublicSubnet:
+    Description: A reference to the public subnet 
+    Value: !Ref PublicSubnet
+
+  InstanceId:
+    Description: InstanceId of the newly created EC2 instance
+    Value: !Ref 'EC2Instance'
+
+  PublicIP:
+    Description: Public IP address of the newly created EC2 instance
+    Value:
+      Fn::GetAtt:
+      - EC2Instance
+      - PublicIp

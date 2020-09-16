@@ -1,0 +1,40 @@
+#! index_app_project 0
+# -*- mode: Conf; coding: utf-8; -*-
+
+# TODO: set region of interest bounding box extents
+index::region_of_interest                               =  0 0 0 X Y Z
+
+# Create scene hierarchy:
+app::scene::group_sparse_vol::type                      = static_scene_group
+app::scene::root::children                              = group_sparse_vol
+
+app::scene::group_sparse_vol::type                      = static_scene_group
+app::scene::group_sparse_vol::children                  = sparse_vol_colormap sparse_vol_raw
+
+app::scene::sparse_vol_raw::type                        = sparse_volume
+app::scene::sparse_vol_raw::importer                    = raw
+
+# TODO: set volume bounding box extents
+app::scene::sparse_vol_raw::bbox                        = 0 0 0 X Y Z
+
+# TODO: Fill in your bucket/directory, file name and extension.
+app::scene::sparse_vol_raw::input_directory             = s3://YOUR_BUCKET/DIR
+app::scene::sparse_vol_raw::input_file_base_name        = DATA
+app::scene::sparse_vol_raw::input_file_extension        = .raw
+
+# TODO: set voxel format
+app::scene::sparse_vol_raw::voxel_format                = uint8
+# Optional: shows file loading in a more verbose way
+app::scene::sparse_vol_raw::is_verbose                  = true
+# set to true if your data is in zyx coordinate order
+app::scene::sparse_vol_raw::convert_zyx_to_xyz          = false
+
+# configure colormap
+app::scene::sparse_vol_raw::cache_compression           = 9
+app::scene::sparse_vol_raw::use_cache                   = true
+app::scene::sparse_vol_colormap::type                   = colormap
+app::scene::sparse_vol_colormap::map_index              = 0
+app::scene::sparse_vol_colormap::map_type               = lookup_table
+app::scene::sparse_vol_colormap::domain                 = 0.0 1.0
+
+
