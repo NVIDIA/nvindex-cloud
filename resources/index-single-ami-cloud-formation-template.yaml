@@ -19,12 +19,16 @@ Parameters:
 
 
 Mappings:
- SubnetConfig:
+  SubnetConfig:
    VPC:
     CIDR: '10.0.0.0/16'
    Public:
     CIDR: '10.0.0.0/24'
-    
+  AWSAMIRegionMap:
+    us-east-1:
+      AMI: ami-0de1a654d20281f3a
+    us-west-2:
+      AMI: ami-0624c66836adb1757
 Resources:
   VPC:
     Type: AWS::EC2::VPC
@@ -89,7 +93,10 @@ Resources:
       SubnetId: !Ref 'PublicSubnet'
       SecurityGroupIds: [!GetAtt 'InstanceSecurityGroup.GroupId']
       KeyName: !Ref 'KeyName'
-      ImageId: ami-0815a37bea5aa89e4
+      ImageId: !FindInMap
+        - AWSAMIRegionMap
+        - !Ref 'AWS::Region'
+        - AMI
       IamInstanceProfile: !Ref 'InstanceProfile'
       Tags:
          - Key: "Name"
