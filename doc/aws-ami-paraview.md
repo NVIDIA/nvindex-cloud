@@ -4,7 +4,7 @@
 
 - To launch an instance, please use the following CloudFormation template form: [TODO](link). Alternatively, you can also use the aws cli tool to launch the CloudFormation template:
 ```sh
-aws cloudformation deploy --stack-name single-instance-index-cfn --template-file index-single-gpu.yml --parameter-overrides 'KeyName=<your-keyname>' --capabilities CAPABILITY_IAM
+aws cloudformation deploy --stack-name single-instance-index-cfn --template-file resources/index-single-ami-cloud-formation-template.yaml --parameter-overrides 'KeyName=<your-keyname>' --capabilities CAPABILITY_IAM
 ```
 
 - You can launch any type of Amazon EC2 GPU instances (G4 or P3) based on your dataset requirements.

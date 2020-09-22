@@ -15,7 +15,7 @@
   ```
   Important: The custom AMI provided is tied to a specific ParallelCluster version. So make sure to install the specific ParallelCluster version, in this case 2.8.0.
 
-- Please use the parallel cluster configuration [template](pcluster_template.config) to create your config file.
+- Please use the parallel cluster configuration [template](resources/pcluster_template.config) to create your config file.
 - Once you customized the config file, please copy it to `~/.parallelcluster/config`.
 - Note: the template configuration enables remote desktop visualization using NICE DCV. To learn more about about NICE DCV refer [here](https://aws.amazon.com/hpc/dcv/)
 
