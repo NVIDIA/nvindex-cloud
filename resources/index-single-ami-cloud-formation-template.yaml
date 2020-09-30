@@ -25,42 +25,6 @@ Mappings:
    Public:
     CIDR: '10.0.0.0/24'
   AWSAMIRegionMap:
-    ap-northeast-1:
-      name:
-    ap-northeast-2:
-      name:
-    ap-south-1:
-      name:
-    ap-southeast-1:
-      name:
-    ap-southeast-2:
-      name:
-    ca-central-1:
-      name:
-    eu-central-1:
-      name:
-    eu-north-1:
-      name:
-    eu-west-1:
-      name:
-    eu-west-2:
-      name:
-    eu-west-3:
-      name:
-    me-south-1:
-      name:
-    sa-east-1:
-      name:
-    us-east-1:
-      name:  ami-0de1a654d20281f3a
-    us-east-2:
-      name:
-    us-gov-east-1:
-      name:
-    us-gov-west-1:
-      name:
-    us-west-1:
-      name:
     us-west-2:
       name: ami-0624c66836adb1757
 Resources:
@@ -130,7 +94,7 @@ Resources:
       ImageId: !FindInMap
         - AWSAMIRegionMap
         - !Ref 'AWS::Region'
-        - AMI
+        - name
       IamInstanceProfile: !Ref 'InstanceProfile'
       Tags:
          - Key: "Name"
