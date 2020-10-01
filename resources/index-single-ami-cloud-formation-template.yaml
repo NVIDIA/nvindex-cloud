@@ -15,8 +15,13 @@ Parameters:
   PasswordDCV:
     Description: Password for logging into NICE DCV session.
     Type: String
-    Default: IndeXonAw$
-
+    MinLength: 1
+    MaxLength: 41
+    AllowedPattern: ^[a-zA-Z0-9]*$
+    NoEcho: true
+  SshIngressIp:
+    Description: Source CIDR IP block for SSH ingress traffic.
+    Type: String
 
 Mappings:
   SubnetConfig:
@@ -25,6 +30,8 @@ Mappings:
    Public:
     CIDR: '10.0.0.0/24'
   AWSAMIRegionMap:
+    us-east-1:
+      name: ami-0de1a654d20281f3a
     us-west-2:
       name: ami-0624c66836adb1757
 Resources:
@@ -116,7 +123,7 @@ Resources:
       - IpProtocol: tcp
         FromPort: 22
         ToPort: 22
-        CidrIp: 0.0.0.0/0
+        CidrIp: !Ref 'SshIngressIp'
       - IpProtocol: tcp
         FromPort: 8080
         ToPort: 8080
