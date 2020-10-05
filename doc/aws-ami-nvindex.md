@@ -2,7 +2,9 @@
 
 ## Launch an EC2 instance with the NVIDIA IndeX AMI:
 
-- To launch an instance, please use the following CloudFormation template form: [TODO](link). Alternatively, you can also use the aws cli tool to launch the CloudFormation template:
+- Go to the [NVIDIA IndeX](http://aws.amazon.com/marketplace/pp/B08H4D3QZR) offering in the AWS Marketplace and subscribe to the image.
+- To launch an instance, please use the following CloudFormation template [form](https://console.aws.amazon.com/cloudformation/home?#/stacks/create/template?templateURL=https://raw.githubusercontent.com/NVIDIA/nvindex-cloud/master/resources/index-single-ami-cloud-formation-template.yaml). Alternatively, you can also use the aws cli tool to launch the CloudFormation template:
+
 ```sh
 aws cloudformation deploy --stack-name single-instance-index-cfn --template-file resources/index-single-ami-cloud-formation-template.yaml --parameter-overrides 'KeyName=<your-keyname>' --capabilities CAPABILITY_IAM
 ```

@@ -2,7 +2,7 @@
 
 ## Custom Amazon Machine Image (AMI):
 
-- Please go to the [NVIDIA IndeX](TODO) offering in the AWS Marketplace and subscribe to the image.
+- Go to the [NVIDIA IndeX](http://aws.amazon.com/marketplace/pp/B08H4D3QZR) offering in the AWS Marketplace and subscribe to the image.
 - Once subscribed, please get the AMI id for your region.
 - Note: AMI is associated with an Amazon EC2 Region. An instance needs to be launched in the same region as the AMI. 
 
