@@ -30,10 +30,46 @@ Mappings:
    Public:
     CIDR: '10.0.0.0/24'
   AWSAMIRegionMap:
-    us-east-1:
-      name: ami-0de1a654d20281f3a
-    us-west-2:
-      name: ami-0624c66836adb1757
+     af-south-1: 
+      name: ami-0fc25b0c3799b2756
+     ap-east-1: 
+      name: ami-0464e64479f086b71
+     ap-northeast-1: 
+      name: ami-08476c8aaa357a2f1
+     ap-northeast-2: 
+      name: ami-0bff3139625de7520
+     ap-south-1: 
+      name: ami-0f4ed190049fb11b9
+     ap-southeast-1: 
+      name: ami-0a01d24ee0070ec88
+     ap-southeast-2: 
+      name: ami-0658fb17444b72a81
+     ca-central-1: 
+      name: ami-0db81696eb0d53bd0
+     eu-central-1: 
+      name: ami-0f92fc126a5fa0df9
+     eu-north-1: 
+      name: ami-0193980baf122ac4d
+     eu-south-1: 
+      name: ami-03fbd12e71889abf6
+     eu-west-1: 
+      name: ami-074314741c3f0499e
+     eu-west-2: 
+      name: ami-0b3395060c442dbb8
+     eu-west-3: 
+      name: ami-08f4b7c2e4ef249e8
+     me-south-1: 
+      name: ami-0ce80ec2e9786039b
+     sa-east-1: 
+      name: ami-0a56ff15308ce0209
+     us-east-1: 
+      name: ami-04e1cba5b76ed00b4
+     us-east-2: 
+      name: ami-0f55dec935c035c16
+     us-west-1: 
+      name: ami-015233e204780e224
+     us-west-2: 
+      name: ami-07f5ea9906c02a604
 Resources:
   VPC:
     Type: AWS::EC2::VPC
