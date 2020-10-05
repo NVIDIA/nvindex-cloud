@@ -24,7 +24,7 @@ Also, users have two main options to deploy IndeX:
 
 Here we provide step-by-step instructions for the different options :
 
-- [Single instance rendering using IndeX native web viewer](./doc/aws-ami-nvindex.md)
-- [Single instance rendering using IndeX for ParaView plugin](./doc/aws-ami-paraview.md)
-- [Cluster Rendering using AWS ParallelCluster and IndeX native web viewer](./doc/aws-pcluster-nvindex.md)
-- [Cluster Rendering using AWS ParallelCluster and IndeX for ParaView plugin](./doc/aws-pcluster-paraview.md)
+- [Single instance rendering using IndeX native web viewer](doc/aws-ami-nvindex.md)
+- [Single instance rendering using IndeX for ParaView plugin](doc/aws-ami-paraview.md)
+- [Cluster Rendering using AWS ParallelCluster and IndeX native web viewer](doc/aws-pcluster-nvindex.md)
+- [Cluster Rendering using AWS ParallelCluster and IndeX for ParaView plugin](doc/aws-pcluster-paraview.md)
