@@ -8,7 +8,7 @@ IndeX leverages GPU-accelerated clusters for scalable, real-time, visualization
 and computing of multi-valued, volumetric data together with embedded geometry
 data.
 
-To learn more about NVIDIA IndeX, go to [page](https://developer.nvidia.com/index).
+To learn more about NVIDIA IndeX, go to the [official page](https://developer.nvidia.com/index).
 
 This repository contains information about:
 * The [NVIDIA IndeX Applicaton from AWS Marketplace](doc/aws.md)
