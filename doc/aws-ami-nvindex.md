@@ -64,6 +64,6 @@ The image comes with a few other sample datasets. Here's how to run them:
 * Parihaka - Seismic Data - Slices
     - `./nvindex-viewer.sh —-add /opt/scenes/022-parihaka-planes/scene/scene.prj`
 
-Please note that some datasets require multiple nodes. Please refer to the sample dataset referance page [here](https://github.com/NVIDIA/nvindex-cloud/blob/master/doc/datasets.md).
+Please note that some datasets require multiple nodes. Please refer to the sample dataset [reference page](datasets.md).
 
 The datasets are read from the s3 bucket.
