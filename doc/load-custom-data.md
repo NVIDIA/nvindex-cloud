@@ -4,7 +4,7 @@ It's possible and quite easy to load your own dataset, as long as it's in a raw 
 
 ## Scene file
 
-The NVIDIA IndeX viewer works through simple key-value base text files called projects. Just place your data in a convenient location (s3 bucket or local disk) and use one of the [raw](scene_template_raw.prj) or [vds](scene_template_vds.prj) template files. For a quick start, you only have to fill in the path and data size.
+The NVIDIA IndeX viewer works through simple key-value base text files called projects. Just place your data in a convenient location (s3 bucket or local disk) and use one of the [raw](../resources/scene_template_raw.prj) or [vds](../resources/scene_template_vds.prj) template files. For a quick start, you only have to fill in the path and data size.
 
 Please note that you have to store your data in a shared location with the compute nodes when using ParallelCluster.
 
