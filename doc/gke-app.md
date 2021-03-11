@@ -47,7 +47,7 @@ Loading your own data is covered in the [Loading your own data](#loading-your-ow
 
 ## Provisioning a Kubernetes Cluster with GKE
 
-A Kubernetes cluster in GKE is a pre-requuisite. Please follow the [GKE Provisioning](doc/gke-provisioning.md)
+A Kubernetes cluster in GKE is a pre-requuisite. Please follow the [GKE Provisioning](gke-provisioning.md)
 guide to get a demo cluster up and running.
 
 ## Quick Install using Google Cloud Marketplace
