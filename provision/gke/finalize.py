@@ -76,7 +76,7 @@ if __name__ == '__main__':
     run_cmd(['kubectl', 'apply', '-f', app_crd_path])
 
     print('Enabling GPUs in GPU cluster...')
-    nv_daemonset = 'https://raw.githubusercontent.com/NVIDIA/nvindex-cloud/master/resources/daemonset-{}-nv.yaml'.format(opts.image.lower())
+    nv_daemonset = 'https://raw.githubusercontent.com/GoogleCloudPlatform/container-engine-accelerators/master/nvidia-driver-installer/cos/daemonset-preloaded.yaml'
     run_cmd(['kubectl', 'apply', '-f', nv_daemonset])
 
     wait_for_gpus(opts.cluster)

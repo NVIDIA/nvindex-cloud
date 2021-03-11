@@ -57,7 +57,7 @@ variable "gpu_node_accelerator_type" {
 
 variable "image_type" {
   description  = "OS to be used: UBUNTU|COS"
-  default      = "UBUNTU"
+  default      = "COS"
 }
 
 variable "preemptible" {
