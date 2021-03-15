@@ -46,14 +46,14 @@ def wait_for_gpus(cluster_name, timeout=datetime.timedelta(minutes=15)):
     cmd = [
             'kubectl', 'get', 'nodes',
             '-l', 'cloud.google.com/gke-nodepool={}-gpu-pool'.format(cluster_name),
-            '-o=jsonpath=\"{.items}\"'
+            '-o=json'
     ]
 
     end_time = datetime.datetime.now() + timeout
     print('Waiting for GPUs to be ready ', end='')
     while datetime.datetime.now() <= end_time:
         output = run_cmd(cmd)
-        items = json.loads(output.decode('UTF-8')[1:-1])
+        items = json.loads(output.decode('UTF-8')).get("items", [])
 
         for i in items:
             gpus = int(i['status']['capacity'].get('nvidia.com/gpu', '0'))
