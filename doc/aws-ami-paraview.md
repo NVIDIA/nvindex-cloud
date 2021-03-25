@@ -24,6 +24,14 @@ aws cloudformation deploy --stack-name single-instance-index-cfn --template-file
 - OR Open your preferred web browser and enter the NICE DCV server URL in the following format `https://<server_public-ip>:8443`
 - To log in, enter `ubuntu` as username and the password selected in the CloudFormation template (default value: `IndeXonAW$`).
 
+If the DCV client/browser session can't log in because the session doesn't exist, you will have to ssh into the node and start a session yourself:
+```sh
+dcv create-session mysession
+dcv list-sessions
+```
+
+Now you should be able to log in.
+
 ## Download and Start ParaView
 
 - Run the utility script to install ParaView with NVIDIA IndeX enabled:
