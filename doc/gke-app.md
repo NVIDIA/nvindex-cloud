@@ -89,7 +89,7 @@ expanded manifest file for future updates to the application. Here's an example
 of expanding the template:
 
 ```shell
-helm template chart/nvindex \
+helm template charts/nvindex \
     --name nvindex-app \
     --set "name=nvindex-app" \
     --set "nodeCount=2" \
