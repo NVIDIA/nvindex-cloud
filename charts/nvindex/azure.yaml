@@ -1,0 +1,5 @@
+
+# Configure Azure Blob Storage connection string
+azure:
+  blob:
+    #connectionString: BlobEndpoint=https://mystoragecontainer.blob.core.windows.net/;SharedAccessSignature=sv=...

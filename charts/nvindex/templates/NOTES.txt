@@ -1,6 +1,9 @@
-You have successfully installed the NVIDIA IndeX application in your cluster.
+You have successfully installed the NVIDIA IndeX application in your cluster as "{{ .Release.Name }}".
 
-To access the cluster please go to: https://TODO!
-
-Username: nvindex
-Password: {{ .Values.viewerGeneratedPassword }}
+{{- if .Values.ingress.enabled -}}
+It should be accessible under:
+https://{{ .Values.ingress.host }}/{{ include "nvindex.fullname" . }}
+{{- else -}}
+To get the url, please run:
+echo https://$(kubectl get service {{ include "nvindex.fullname" . }}-viewer -o jsonpath="{.status.loadBalancer.ingress[0].ip}")
+{{- end -}}

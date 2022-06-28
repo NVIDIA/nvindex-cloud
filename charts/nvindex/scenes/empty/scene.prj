@@ -1,0 +1,6 @@
+#! index_app_project 0
+# -*- mode: Conf; -*-
+
+# Empty scene
+app::scene::root::children =
+

@@ -1,35 +1,31 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: "{{ include "nvindex.fullname" . }}-worker"
+  name: "{{ .Release.Name }}-worker"
   labels:
-    {{- include "nvindex.labels" . | nindent 4 }}
+    app.kubernetes.io/name: "{{ .Release.Name }}"
     app.kubernetes.io/component: worker
 spec:
   replicas: {{ add .Values.nodeCount -1 }}
   selector:
     matchLabels:
-      {{- include "nvindex.selectorLabels" . | nindent 6 }}
+      app.kubernetes.io/name: "{{ .Release.Name }}"
       app.kubernetes.io/component: worker
   template:
     metadata:
       labels:
-        {{- include "nvindex.selectorLabels" . | nindent 8 }}
+        app.kubernetes.io/name: "{{ .Release.Name }}"
         app.kubernetes.io/component: worker
     spec:
-      imagePullSecrets:
-      {{- if .Values.nvindex.image.secret }}
-      - name: "{{ .Values.nvindex.image.secret }}"
-      {{- end }}
       volumes:
         - name: rsync-config-files
           emptyDir: {}
         - name: setup-scripts
           configMap:
-            name: "{{ include "nvindex.fullname" . }}-setup-scripts"
+            name: setup-scripts
       initContainers:
         - name: setup
-          image: {{ template "cloudhelper.image" . }}
+          image: {{ template "gcloudsdk.image" . }}
           volumeMounts:
             - name: setup-scripts
               mountPath: /setup
@@ -42,19 +38,21 @@ spec:
           image: {{ template "nvindex.image" . }}
           command: [ './nvindex-remote-service.sh' ]
           args: [
-            '--add', '/config/extra.prj',
-            '--cluster', 'TCP_WITH_DISCOVERY',
+            '--nogl',
+            '--add', 'project_remote.prj',
+            '-dice::network::mode', 'TCP_WITH_DISCOVERY',
             '-dice::network::retention', '5',
             '-app::enable_fail_safety', 'yes',
-            '-dice::network::discovery_address', "{{ include "nvindex.fullname" . }}-viewer-0",
+            '-dice::network::discovery_address', '{{ .Release.Name }}-viewer-0',
           ]
           env:
-          - name: LICENSE_SEARCH_PATH
-            value: /config
+            - name: LICENSE_SEARCH_PATH
+              value: "/config-external"
           volumeMounts:
           - name: rsync-config-files
             mountPath: /config
           ports:
+          - containerPort: 5555
           - containerPort: 10000
           - containerPort: 10001
           resources:
@@ -62,16 +60,7 @@ spec:
               nvidia.com/gpu: "{{ .Values.gpuCount }}"
 {{- if .Values.debug }}
         - name: debug
-          image: {{ template "debughelper.image" . }}
+          image: gcr.io/google-containers/toolbox
           command: ["bash"]
           args: ["-c", "while true; do sleep 60s; done"]
 {{- end }}
-      tolerations:
-      - key: "kubernetes.azure.com/scalesetpriority"
-        operator: "Equal"
-        value: "spot"
-        effect: "NoSchedule"
-      - key: "sku"
-        operator: "Equal"
-        value: "gpu"
-        effect: "NoSchedule"

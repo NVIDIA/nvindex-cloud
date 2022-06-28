@@ -1,0 +1,34 @@
+## EKS specific presets
+
+## NVIDIA IndeX container path
+nvindex:
+  image:
+    registry: TODO.dkr.ecr.us-east-1.amazonaws.com
+    repository: nvindex
+    tag: TODOO
+    pullPolicy: IfNotPresent
+    secret: "nvindexcr"
+  config:
+    allowedOrigins: ""
+
+# Cloud helper
+cloudhelper:
+  image:
+    registry: docker.io 
+    repository: amazon/aws-cli 
+    tag: latest
+    pullPolicy: IfNotPresent
+
+debughelper:
+  image:
+    registry: docker.io 
+    repository: amazon/aws-cli 
+    tag: latest
+    pullPolicy: IfNotPresent
+
+serviceAccount:
+  # Specifies whether a service account should be created
+  create: false
+  name: nvindex-access
+
+dataLocation: s3://nvindex-datasets-us-west2/scenes

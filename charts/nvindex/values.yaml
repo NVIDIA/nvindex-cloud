@@ -1,41 +1,61 @@
-# from schema.yaml
-#
-name: nvindex
-publishedVersion: '2.2.3'
+## Customizable fields:
 
+# How many nodes to use for this session?
 nodeCount: 1
+# How many GPUs does one node have?
 gpuCount: 1
 
-# Image configuration:
-nvindex:
-  image:
-    registry: gcr.io
-    repository: nv-schlumberger/nvindex-tape-cloud
-    tag: 0.5
+# Path to scene dir, relative to chart dir.
+#scene: scenes/00-supernova_ncsa_small
+scene:
 
-nginx:
-  image:
-    registry: mirror.gcr.io
-    repository: library/nginx
-    tag: latest
+importThreads:
 
-gcloudsdk:
-  image:
-    registry: gcr.io
-    repository: google.com/cloudsdktool/cloud-sdk
-    tag: alpine
-
-tls:
-  base64EncodedPrivateKey: null
-  base64EncodedCertificate: null
-
-viewerGeneratedPassword: null
-
-dataLocation: gs://nvindex-data-samples/scenes
-configLocation: gs://nvindex-data-samples/config
-
-gcpMarketplace: true
+# Debug adds a side container for investigating
 debug: false
 
-# NGINX is used as a proxy to the viewer.
-useNginx: true
+## Non-customizable fiels
+
+name: nvindex
+publishedVersion: '2.3.1'
+
+# NVIDIA IndeX container path
+nvindex:
+  image:
+    registry: 185367027512.dkr.ecr.us-east-1.amazonaws.com
+    repository: nvindex
+    tag: 360141
+    pullPolicy: IfNotPresent
+    secret: "nvindexcr"
+  config:
+    allowedOrigins: ""
+
+# Cloud helper
+cloudhelper:
+  image:
+    registry: mcr.microsoft.com
+    repository: azure-cli
+    tag: latest
+    pullPolicy: IfNotPresent
+
+debughelper:
+  image:
+    registry: mcr.microsoft.com
+    repository: azure-cli
+    tag: latest
+    pullPolicy: IfNotPresent
+
+ingress:
+  enabled: true
+  annotations:
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: nvindex-basic-auth-secret
+    nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required'
+    nginx.ingress.kubernetes.io/proxy-send-timeout: "3600"
+    nginx.ingress.kubernetes.io/proxy-read-timeout: "3600"
+  host: TODO.us-east-1.elb.amazonaws.com
+  tls:
+    secretName: ingress-tls-secret
+
+nameOverride: ""
+fullnameOverride: ""

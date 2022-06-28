@@ -1,0 +1,99 @@
+#! index_app_project 0
+# -*- mode: Conf; -*-
+
+app::scene::info::name = Core-Collapse Supernova
+app::scene::info::description = Core-collapse supernovae are the birth places of neutron stars and black holes. They liberate the ashes of stellar evolution, seeding the interstellar gas with the elements from which planets form and life is made. Despite their importance for much of astrophysics, our understanding of the supernova explosion mechanism, and its dependence on progenitor star properties, is still incomplete. The present dataset represents a short sequence of a core-collapse simulations. Such simulations produce terabytes of output posing challenges regarding the effective analysis of the physical processes. NVIDIA IndeX gives researchers and scientists essential visual insights into such massive supernova simulations and lets them expore the involved astrophysics processesvisualize. Please also review the [paper](https://sc18.supercomputing.org/proceedings/sci_viz/sci_viz_files/svs102s2-file1.pdf).
+app::scene::info::credits = Phillip Moesta, Christian D. Ott, Roland Haas. Simulations done on NSF / NCSA Blue Waters Supercomputer. Simulation data kindly provided by Christian Ott.
+app::scene::info::preview_image_url = https://nvindex-data-samples.storage.googleapis.com/scenes/00-supernova_ncsa_small/scene/supernova.jpg
+app::scene::info::project_url = https://nvindex-data-samples.storage.googleapis.com/scenes/00-supernova_ncsa_small/scene/scene.prj
+app::scene::info::requirements = Dataset size: 0.3 GB, Required GPUs: 1xT4, Recommended GPUs: 1xT4
+
+app::variable_expansion = true
+
+index::canvas_resolution                                            = 1400 786
+
+# scene setup
+index::region_of_interest                   = 0 0 0 633 633 633
+index::translation                          = 0 0 0
+index::scaling                              = 1 1 1
+index::subcube_size                         = 252 252 252
+index::subcube_border_size                  = 2
+
+index::volume_filter                        = trilinear_post_hw
+index::ray_step_size_min                    = 0.4
+
+# Main Scene Setup
+app::scene::root::children                  = headlight volume_data
+
+# colormap
+app::colormap::startup_colormap_index       = 42
+app::colormap::boundary_mode                = clamp_to_transparent
+
+# light setup
+app::scene::headlight::type                 = directional_headlight
+app::scene::headlight::direction            = 0 0 -1
+app::scene::headlight::intensity            = 1 1 1
+
+# Disable camera predefined view:
+app::examiner::predefined_view::enable = no
+app::examiner::predefined_view::startup_update = no
+
+# Initial camera:
+index::camera::aperture = 0.032999999821186066
+index::camera::aspect = 1.78
+index::camera::clip_max = 10000
+index::camera::clip_min = 0.0010000000474974513
+index::camera::from = 948.5842895507812 -261.4344787597656 283.7041015625
+index::camera::focal = 0.029999999329447746
+index::camera::orthographic = false
+index::camera::up = -0.4298316240310669 -0.4352668523788452 -0.791067361831665
+index::camera::dir = -0.7446562051773071 0.6663677096366882 0.037964653223752975
+
+
+# Rotate around the center of the region of interest
+app::examiner::initial_rotation_center::type = roi_center
+
+# Scene Root Node
+
+app::scene::volume_data::type                = static_scene_group
+app::scene::volume_data::children            = animation_group
+
+app::scene::animation_group::type                          = static_scene_group
+app::scene::animation_group::children                      = svol_render_props supernova_xac supernova_colormap supernova_volume
+
+app::scene::svol_render_props::type                              = sparse_volume_rendering_properties
+app::scene::svol_render_props::filter_mode                       = trilinear
+app::scene::svol_render_props::sampling_distance                 = 0.5
+
+app::scene::supernova_colormap::map_type                      = lookup_table
+app::scene::supernova_colormap::type                          = colormap
+app::scene::supernova_colormap::map_index                     = 42
+app::scene::supernova_colormap::domain                        = 0.2 1
+
+# load volume program
+app::scene::supernova_xac::type                               = rendering_kernel_program
+app::scene::supernova_xac::target                             = volume_sample_program
+app::scene::supernova_xac::source_file                        = ${NVINDEX_SCENES_DIR}/xac_volume_gradientcolor_nova_uint8.cuh
+
+# load time-dependent volume data
+app::scene::supernova_volume::type                              = sparse_volume
+app::scene::supernova_volume::name                              = Supernova Sequence
+app::scene::supernova_volume::importer                          = raw
+app::scene::supernova_volume::voxel_format                      = uint8
+app::scene::supernova_volume::bbox                              = 0 0 0 633 633 633
+app::scene::supernova_volume::convert_zyx_to_xyz                = false
+
+# For data, actual bucket path is used as it is read directly from the bucket.
+app::scene::supernova_volume::input_directory                   = ${NVINDEX_DATA_BUCKET}/00-supernova_ncsa_small/data
+app::scene::supernova_volume::input_file_base_name              = Export_entropy_633x633x633_uint8_T1074
+app::scene::supernova_volume::input_file_extension              = .raw
+
+app::scene::supernova_volume::cache_compression                 = 9
+app::scene::supernova_volume::use_cache                         = true
+app::scene::supernova_volume::is_verbose = true
+
+# Colormaps
+app::colormap::file_count = 43
+app::colormap::file_40 = ${NVINDEX_SCENES_DIR}/nova01.cmap
+app::colormap::file_41 = ${NVINDEX_SCENES_DIR}/nova02.cmap
+app::colormap::file_42 = ${NVINDEX_SCENES_DIR}/nova03.cmap

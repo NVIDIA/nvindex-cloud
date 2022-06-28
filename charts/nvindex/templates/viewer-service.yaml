@@ -1,29 +1,18 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: "{{ .Release.Name }}-viewer"
+  name: "{{ include "nvindex.fullname" . }}-viewer"
   labels:
-    app.kubernetes.io/name: "{{ .Release.Name }}"
+    {{- include "nvindex.labels" . | nindent 4 }}
     app.kubernetes.io/component: viewer
 spec:
   ports:
-  {{ if .Values.useNginx }}
-  - name: http
-    port: 80
-    protocol: TCP
-    targetPort: 80
-  - name: https
-    port: 443
-    protocol: TCP
-    targetPort: 443
-  {{ else }}
   - name: http
     port: 80
     protocol: TCP
     targetPort: 8080
-  {{ end }}
   selector:
-    app.kubernetes.io/name: "{{ .Release.Name }}"
+    {{- include "nvindex.selectorLabels" . | nindent 4 }}
     app.kubernetes.io/component: viewer
-  type: LoadBalancer
+  type: ClusterIP
 

@@ -1,0 +1,134 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: "{{ .Release.Name }}-viewer"
+  labels:
+    app.kubernetes.io/name: "{{ .Release.Name }}"
+    app.kubernetes.io/component: viewer
+spec:
+  replicas: 1
+  serviceName: "{{ .Release.Name }}-viewer-0"
+  selector:
+    matchLabels:
+        app.kubernetes.io/name: "{{ .Release.Name }}"
+        app.kubernetes.io/component: viewer
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: "{{ .Release.Name }}"
+        app.kubernetes.io/component: viewer
+    spec:
+      volumes:
+        - name: viewer-files
+          emptyDir: {}
+        {{ if .Values.useNginx }}
+        - name: nginx-conf-vol
+          configMap:
+            name: nginx-conf
+        {{ end }}
+        {{ if .Values.tls.base64EncodedPrivateKey }}
+        - name: tls-certs-files
+          secret:
+            secretName: "{{ .Release.Name }}-tls"
+        {{ end }}
+        - name: htpasswd-file
+          emptyDir: {}
+        - name: rsync-scene-files
+          emptyDir: {}
+        - name: rsync-config-files
+          emptyDir: {}
+        - name: setup-scripts
+          configMap:
+            name: setup-scripts
+      initContainers:
+          # Copy viewer files from IndeX container into a emptyDir that will
+          # be used by the nginx container.
+        {{ if .Values.useNginx }}
+        - name: copy-viewer-files
+          image: {{ template "nvindex.image" . }}
+          command: ['bash']
+          args: ['-c', 'cp -R /opt/nvidia-index/demo/html5_viewer/* /output']
+          volumeMounts:
+            - name: viewer-files
+              mountPath: /output
+        {{ if .Values.viewerGeneratedPassword }}
+          # Generate a htpasswd file for basic auth based on generate password for nginx.
+        - name: gen-htpasswd
+          image: {{ template "nvindex.image" . }}
+          command: ['bash']
+          # Generated passwd needs to be decoded from base64, encrypted and saved.
+          args: ['-c', 'echo {{ .Values.viewerGeneratedPassword }} | echo nvindex:$(openssl passwd -apr1 -in -) > /htpasswd/htpasswd']
+          volumeMounts:
+            - name: htpasswd-file
+              mountPath: /htpasswd
+        {{ end }} # if passwd enabled
+        {{ end }} # if nginx enabled
+        - name: setup
+          image: {{ template "gcloudsdk.image" . }}
+          volumeMounts:
+            - name: setup-scripts
+              mountPath: /setup
+            - name: rsync-config-files
+              mountPath: /config
+            - name: rsync-scene-files
+              mountPath: /scenes
+          command: ['bash']
+          args: ['/setup/setup_head_node.sh']
+      containers:
+        - name: nvindex
+          image: {{ template "nvindex.image" . }}
+          command: [ './nvindex-viewer.sh' ]
+          args: [
+            '--nogl',
+            '-dice::network::mode', 'TCP_WITH_DISCOVERY',
+            '-dice::network::retention', '5',
+            '-app::enable_fail_safety', 'yes',
+            '-app::cluster_size', '{{ .Values.nodeCount }}',
+            '-dice::network::discovery_address', '0.0.0.0',
+            '--add', "/config/extra.prj"
+          ]
+          env:
+            - name: NVINDEX_DATA
+              value: "{{ .Values.dataLocation }}"
+            - name: LICENSE_SEARCH_PATH
+              value: "/config"
+          ports:
+          - containerPort: 5555
+          - containerPort: 10000
+          - containerPort: 10001
+          - containerPort: 8080
+          volumeMounts:
+          - name: rsync-scene-files
+            mountPath: /scenes
+          - name: rsync-config-files
+            mountPath: /config
+          resources:
+            limits:
+              nvidia.com/gpu: "{{ .Values.gpuCount }}"
+        {{- if .Values.useNginx }}
+        - name: nginx
+          image: {{ template "nginx.image" . }}
+          volumeMounts:
+          - name: viewer-files
+            mountPath: /usr/share/nginx/html
+          - name: nginx-conf-vol
+            mountPath: /etc/nginx/nginx.conf
+            subPath: nginx.conf
+          {{- if .Values.tls.base64EncodedPrivateKey }}
+          - name: tls-certs-files
+            mountPath: /root/certs
+          {{- end }}
+          {{- if .Values.viewerGeneratedPassword }}
+          - name: htpasswd-file
+            mountPath: /htpasswd
+          {{- end }}
+          ports:
+          - containerPort: 80
+          - containerPort: 443
+        {{- end }}
+{{- if .Values.debug }}
+        - name: debug
+          image: gcr.io/google-containers/toolbox
+          command: ["bash"]
+          args: ["-c", "while true; do sleep 60s; done"]
+{{- end }}

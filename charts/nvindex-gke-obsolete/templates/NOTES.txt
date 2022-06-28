@@ -1,0 +1,6 @@
+You have successfully installed the NVIDIA IndeX application in your cluster.
+
+To access the cluster please go to: https://TODO!
+
+Username: nvindex
+Password: {{ .Values.viewerGeneratedPassword }}

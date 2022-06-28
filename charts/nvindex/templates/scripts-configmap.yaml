@@ -1,29 +1,81 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: setup-scripts
+  name: "{{ include "nvindex.fullname" . }}-setup-scripts"
+  labels:
+    {{- include "nvindex.labels" . | nindent 4 }}
 data:
   setup_head_node.sh: |
     #!/bin/bash
 
-    set -x
+    cp /setup/extra.prj /config
+    cp /setup/empty.prj /config
+    cp /setup/license.lic /config || true
 
-    echo "Syncing config files ..."
-    gsutil -m rsync -d -r {{ .Values.configLocation }} /config
-
-    echo "Syncing scene files ..."
-    gsutil -m rsync -d -r -x ".*\/data\/*.*$" {{ .Values.dataLocation }} /scenes
+    #echo "Syncing sample files ..."
+    #aws s3 cp --recursive --exclude "*/data/*" {{ .Values.dataLocation }} /scenes
 
   setup_worker.sh: |
     #!/bin/bash
 
-    set -x
-
-    echo "Syncing config files ..."
-    gsutil -m rsync -d -r {{ .Values.configLocation }} /config
+    cp /setup/extra.prj /config
+    cp /setup/empty.prj /config
+    cp /setup/license.lic /config || true
 
     echo -n "Waiting for head node to be available "
-    until nc -z "{{ .Release.Name }}-viewer-0" 5555; do
-      echo .
+
+    # Check admin port as it starts earlier without the cluster being set up.
+    until curl --silent http://{{- include "nvindex.fullname" . }}-viewer-0:8080 -o /dev/null; do
+      echo -n .
       sleep 0.5
     done
+
+  extra.prj: |
+    #! index_app_project 0
+    # -*- mode: Conf; coding: utf-8; -*-
+
+    {{- if .Values.importThreads }}
+    index::debug_configuration::async_subset_load_threads={{ .Values.importThreads }}
+    {{- end }}
+
+    index::app::components::html5_integration::IHtml5_connection_manager::allowed_origins = {{ .Values.nvindex.config.allowedOrigins }}
+    # Base prefix required for ingress routing:
+    index::app::components::html5_integration::IHtml5_connection_manager::base_prefix = {{ printf "/%s" (include "nvindex.fullname" .) }}
+
+    # Set some more realistic bitrates for cloud
+    index::app::components::html5_integration::html5_video_streaming::h264::bitrate = 7000000
+    index::app::components::html5_integration::html5_video_streaming::h264::framerate = 20
+    index::app::components::html5_integration::html5_video_streaming::h264_nvenc::bitrate = 7000000
+    index::app::components::html5_integration::html5_video_streaming::h264_nvenc::framerate = 20
+
+    index::app::viewer_command::preset_loader::colormap::directory = /colormaps
+    index::app::viewer_command::preset_loader::colormap::filetype  = .cmap
+
+    # Point Cloud specific stuff
+    app::examiner::scale_zoom_by_distance = true
+
+    index::canvas_resolution = 1920 1080
+    index::image_file_canvas_resolution = 3000 1500
+    index::camera::aspect = 2
+
+    app::auto_reconnect = 2
+    app::show_pick_point = no
+
+    index::debug_configuration::retain_subregion_resources          = 1
+    index::debug_configuration::detailed_memory_dump                = 1
+    index::debug_configuration::cuda_rtc_print_kernel_info          = 0
+    index::debug_configuration::cuda_device_memory_use_current_info = 1
+
+    index::scaling = 1 1 1
+  
+    #index::region_of_interest = 0 0 0 500 500 150
+    #index::subcube_size = 125 125 150
+
+  empty.prj: |
+    #! index_app_project 0
+    # -*- mode: Conf; coding: utf-8; -*-
+    app::scene::root::children =
+
+  {{ range $path, $_ := ( .Files.Glob ("license.lic") ) }}
+  {{ base $path }}: |- {{ $.Files.Get $path | nindent 4 }}
+  {{ end }}
