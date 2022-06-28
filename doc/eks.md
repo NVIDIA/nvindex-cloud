@@ -162,17 +162,3 @@ importanly putting all sessions behind one LoadBalancer endpoint.
 
 - The `ingress-tls-secret` is used for storing a (self-signed) certificate.
 
-
-
-TODO
-```
-This setup is not 
-
-- You could use the recommended [AWS ALB Ingress Controller](https://aws.amazon.com/blogs/opensource/kubernetes-ingress-aws-alb-ingress-controller). This example
-uses nginx for simplicity and portability.
-
-- You could also expose the Viewer Service directly by changing the service type to `LoadBalancer` and
-disabling the Ingress.
-
-- You could plug your own authentication configuration. For example [External OAUTH Authentication](https://kubernetes.github.io/ingress-nginx/examples/auth/oauth-external-auth).
-```
