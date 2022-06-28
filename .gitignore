@@ -1,1 +1,5 @@
 mirror.sh
+**/__pycache__
+**/.terraform
+**/*.tfstate
+**/*.tfstate.*
