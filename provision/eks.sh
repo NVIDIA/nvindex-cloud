@@ -144,7 +144,9 @@ managedNodeGroups:
     spot: $USE_SPOT
 EOF
 
+set -e
 eksctl create cluster -f /tmp/cluster.yaml
+set +e
 
 echo "Set up Ingress: "
 
