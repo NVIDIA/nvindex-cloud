@@ -1,4 +1,4 @@
-{{ if and .Values.gcpMarketplace (eq .Values.gcpMarketplace true) }}
+{{ if .Values.gcpMarketplace }}
 ---
 apiVersion: app.k8s.io/v1beta1
 kind: Application
