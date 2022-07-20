@@ -22,8 +22,9 @@ EKS cluster ready deployed at https://a3ade41bbf77749e492276bd456c625b-155198297
 
 To start a IndeX session run:
 
+```
 helm install test charts/nvindex \
-    --set values charts/nvindex/eks.yaml \
+    --values charts/nvindex/eks.yaml \
     --set ingress.host=a3ade41bbf77749e492276bd456c625b-155198297.us-east-1.elb.amazonaws.com \
     --wait
 ```
