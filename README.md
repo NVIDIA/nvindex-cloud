@@ -11,7 +11,7 @@ data.
 To learn more about NVIDIA IndeX, go to the [official page](https://developer.nvidia.com/index).
 
 This repository contains information about:
-* How to run [NVIDIA IndeX Container from AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-jungamkavzpw2) in [EKS](doc/eks.md).
+* How to run the [NVIDIA IndeX Container from AWS Marketplace](https://aws.amazon.com/marketplace/pp/prodview-jungamkavzpw2) in [EKS](doc/eks.md).
 * (deprecated) The [NVIDIA IndeX Applicaton from AWS Marketplace](doc/aws.md)
 * (deprecated) The [NVIDIA IndeX Application from Google Cloud Marketplace](doc/gke-app.md)
 
