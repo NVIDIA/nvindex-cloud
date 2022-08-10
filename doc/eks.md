@@ -1,5 +1,4 @@
 # Running NVIDIA IndeX in AWS EKS
-[toc]
 
 This guide will explain how to deploy the NVIDIA IndeX container in a EKS cluster with further
 instructions on how to load a sample dataset. The idea is simple: set up a EKS cluster (or use
@@ -10,7 +9,7 @@ and existing one) and install the NVIDIA IndeX via the helm chart.
 To run NVIDIA IndeX, an EKS cluster with GPU nodes is required. The simplest way to get a EKS
 cluster (if you don't have one) you can use provided our EKS provisioning script:
 
-```sh
+```
 ./provision/eks.sh --password mypassword
 ```
 
@@ -19,6 +18,7 @@ Once the script is done, you will find instructions how to install the helm char
 ...
 
 EKS cluster ready deployed at https://a3ade41bbf77749e492276bd456c625b-155198297.us-east-1.elb.amazonaws.com.
+```
 
 To start a IndeX session run:
 
