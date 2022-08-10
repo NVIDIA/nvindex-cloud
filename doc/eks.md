@@ -4,6 +4,10 @@ This guide will explain how to deploy the NVIDIA IndeX container in a EKS cluste
 instructions on how to load a sample dataset. The idea is simple: set up a EKS cluster (or use
 and existing one) and install the NVIDIA IndeX via the helm chart.
 
+***Disclaimer: this container is a paid software solution. If you run the the steps below you will incur costs
+beyond the AWS infrastructure. Please consult the [product page](http://aws.amazon.com/marketplace/pp/prodview-jungamkavzpw2)
+for more information related to costs.***
+
 ## Provisioning a EKS cluster
 
 To run the NVIDIA IndeX container, an EKS cluster with NVIDIA GPU nodes is required. The simplest way to
