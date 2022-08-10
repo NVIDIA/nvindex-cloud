@@ -3,9 +3,9 @@
 ## NVIDIA IndeX container path
 nvindex:
   image:
-    registry: TODO.dkr.ecr.us-east-1.amazonaws.com
-    repository: nvindex
-    tag: TODOO
+    registry: 709825985650.dkr.ecr.us-east-1.amazonaws.com
+    repository: ingram-micro/185367027512.dkr.ecr.us-east-1.amazonaws.com/nvindex
+    tag: 359600.1414-5
     pullPolicy: IfNotPresent
     secret: "nvindexcr"
   config:
