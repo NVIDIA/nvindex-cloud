@@ -6,23 +6,26 @@ and existing one) and install the NVIDIA IndeX via the helm chart.
 
 ## Provisioning a EKS cluster
 
-To run NVIDIA IndeX, an EKS cluster with GPU nodes is required. The simplest way to get a EKS
-cluster (if you don't have one) you can use provided our EKS provisioning script:
+To run the NVIDIA IndeX container, an EKS cluster with NVIDIA GPU nodes is required. The simplest way to
+provision an EKS cluster (if you don't have one) is to use the provisioning script from this repository:
 
 ```
 ./provision/eks.sh --password mypassword
 ```
 
+(Tested with awscli 2.7.21 and eksctl 0.107.0.)
+
 Once the script is done, you will find instructions how to install the helm chart:
 ```
+2022-08-10 11:56:16 [ℹ]  eksctl version 0.66.0
+2022-08-10 11:56:16 [ℹ]  using region us-east-1
+
 ...
 
 EKS cluster ready deployed at https://a3ade41bbf77749e492276bd456c625b-155198297.us-east-1.elb.amazonaws.com.
-```
 
 To start a IndeX session run:
 
-```
 helm install test charts/nvindex \
     --values charts/nvindex/eks.yaml \
     --set ingress.host=a3ade41bbf77749e492276bd456c625b-155198297.us-east-1.elb.amazonaws.com \
@@ -38,8 +41,8 @@ The provisioning script does the following steps:
 The following steps will assume that this provisioning script has been used. Please take note of
 ingress address, as this will be the entrypoint for the deployments.
 
-If you already have an existing EKS cluster with NVIDIA GPUs, you can have a look at the script
-to pick and choose what you need. For example having a ingress might not be necessary.
+If you already have an existing EKS cluster with NVIDIA GPUs, you can have a look at the provisioning
+script to pick and choose what you need. For example, an ingress might not be required for your case.
 
 
 ## Starting up a NVIDIA IndeX Session
@@ -105,7 +108,7 @@ If all went well, you should see the rendering:
 
 ![screenshot](images/supernova.png)
 
-You can also start with an empty scene by setting the scene option to `scene=scenes/00-supernova_ncsa_small`.
+You can also start with an empty scene by setting the scene option to `scene=scenes/empty`.
 
 ### Loading Data with the WebSocket JSONRPC API
 
