@@ -1,6 +1,6 @@
 #!/usr/bin/bash
 
-REGION=us-east-1
+REGION=us-east-2
 CLUSTER_NAME=kube1
 
 VM_SIZE_GPU=g4dn.xlarge
