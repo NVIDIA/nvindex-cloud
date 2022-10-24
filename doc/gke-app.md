@@ -24,7 +24,7 @@ from the command line interface or generated automatically when using "Click To 
 
 The TLS certificates are generated automatically for "Click to Deploy" (self
 signed). When using the command line interface, they have to be provided by the user. More details are
-provided in the [Update your SSL certificate](#update-your-ssl-certificate)
+provided in the [TLS certificates](#tls-certificates)
 section.
 
 To achieve scaling of large volume data, NVIDIA IndeX runs in a cluster. For a cluster
