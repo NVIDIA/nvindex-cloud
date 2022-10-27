@@ -13,6 +13,8 @@ USER=nvindex
 PASSWORD=test123
 USE_SPOT=false
 
+TMPDIR=$(mktemp -d)
+
 usage()
 {
     echo "Usage: $0 [options...]"
@@ -49,6 +51,7 @@ checkenv()
 	checktool openssl "Please install via package management."
 	checktool htpasswd "Please install via package management."
 	checktool jq "Please install via package management."
+	checktool mktemp "Please install via package management."
 }
 
 ARGS=("$@") # Work on a local copy of the argument list
@@ -116,8 +119,7 @@ elif [[ $1 == "--help" ]]; then
     exit 0
 fi
 
-
-cat <<EOF > /tmp/cluster.yaml
+cat <<EOF > $TMPDIR/cluster.yaml
 ---
 apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
@@ -145,7 +147,7 @@ managedNodeGroups:
 EOF
 
 set -e
-eksctl create cluster -f /tmp/cluster.yaml
+eksctl create cluster -f $TMPDIR/cluster.yaml
 set +e
 
 echo "Set up Ingress: "
@@ -167,11 +169,11 @@ APP_NAME=$(echo $HOST | cut -d . -f 1)
 openssl req -new -x509 \
     -sha256 -nodes \
     -days 365 -newkey rsa:2048 \
-    -keyout /tmp/tls.key -out /tmp/tls.crt \
+    -keyout $TMPDIR/tls.key -out $TMPDIR/tls.crt \
     -subj "/CN=elb.amazonaws.com/O=nvindex" \
     -addext "subjectAltName = DNS:$HOST"
 
-kubectl create secret tls ingress-tls-secret --key /tmp/tls.key --cert /tmp/tls.crt
+kubectl create secret tls ingress-tls-secret --key $TMPDIR/tls.key --cert $TMPDIR/tls.crt
 kubectl annotate secret ingress-tls-secret app.nvindex.io/host="$HOST"
 
 # Update helm chart with the certificate
@@ -179,8 +181,8 @@ helm upgrade ingress-nginx ingress-nginx/ingress-nginx \
     --set controller.extraArgs.default-ssl-certificate=default/ingress-tls-secret
 
 # Generate user/pw
-htpasswd -b -c /tmp/auth $USER $PASSWORD
-kubectl create secret generic nvindex-basic-auth-secret --from-file=/tmp/auth
+htpasswd -b -c $TMPDIR/auth $USER $PASSWORD
+kubectl create secret generic nvindex-basic-auth-secret --from-file=$TMPDIR/auth
 
 echo ""
 echo "EKS cluster ready deployed at https://$HOST."
@@ -192,3 +194,4 @@ echo "    --values charts/nvindex/eks.yaml \\"
 echo "    --set ingress.host=$HOST \\"
 echo "    --wait"
 
+rm -Rf $TMPDIR
