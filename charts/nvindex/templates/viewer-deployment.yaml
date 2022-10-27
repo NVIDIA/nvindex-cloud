@@ -48,8 +48,6 @@ spec:
         - name: nvindex
           image: {{ template "nvindex.image" . }}
           imagePullPolicy: {{ .Values.nvindex.image.pullPolicy }}
-          command: ['sleep']
-          args: [ '30000' ]
           command: [ './nvindex-viewer.sh' ]
           args: [
             '--add', '/config/extra.prj',
@@ -94,12 +92,3 @@ spec:
           - name: rsync-config-files
             mountPath: /config
 {{- end }}
-      tolerations:
-      - key: "kubernetes.azure.com/scalesetpriority"
-        operator: "Equal"
-        value: "spot"
-        effect: "NoSchedule"
-      - key: "sku"
-        operator: "Equal"
-        value: "gpu"
-        effect: "NoSchedule"
