@@ -49,7 +49,6 @@ checkenv()
     checktool eksctl "Please install: https://docs.aws.amazon.com/eks/latest/userguide/eksctl.html"
     checktool helm "Please install: https://helm.sh/docs/intro/install"
 	checktool openssl "Please install via package management."
-	checktool htpasswd "Please install via package management."
 	checktool jq "Please install via package management."
 	checktool mktemp "Please install via package management."
 }
@@ -180,10 +179,6 @@ kubectl annotate secret ingress-tls-secret app.nvindex.io/host="$HOST"
 helm upgrade ingress-nginx ingress-nginx/ingress-nginx \
     --set controller.extraArgs.default-ssl-certificate=default/ingress-tls-secret
 
-# Generate user/pw
-htpasswd -b -c $TMPDIR/auth $USER $PASSWORD
-kubectl create secret generic nvindex-basic-auth-secret --from-file=$TMPDIR/auth
-
 echo ""
 echo "EKS cluster ready deployed at https://$HOST."
 echo ""
@@ -192,6 +187,8 @@ echo ""
 echo "helm install test charts/nvindex \\"
 echo "    --values charts/nvindex/eks.yaml \\"
 echo "    --set ingress.host=$HOST \\"
+echo "    --set auth.username=nvindex \\"
+echo "    --set auth.password=$(openssl rand -base64 12) \\"
 echo "    --wait"
 
 rm -Rf $TMPDIR

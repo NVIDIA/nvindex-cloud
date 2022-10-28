@@ -45,6 +45,11 @@ debughelper:
     tag: latest
     pullPolicy: IfNotPresent
 
+auth:
+  enabled: true
+  username: nvindex
+  password: test123
+
 ingress:
   enabled: true
   annotations:

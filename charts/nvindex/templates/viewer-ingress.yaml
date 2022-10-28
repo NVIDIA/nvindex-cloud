@@ -12,10 +12,20 @@ metadata:
   name: {{ $fullName }}
   labels:
     {{- include "nvindex.labels" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
   annotations:
+
+    # Add remaining ingress annotations
+    {{- with .Values.ingress.annotations }}
     {{- toYaml . | nindent 4 }}
-  {{- end }}
+    {{- end }}
+
+    # Use our own secret for auth:
+    {{- if .Values.auth.enabled }}
+    nginx.ingress.kubernetes.io/auth-type: basic
+    nginx.ingress.kubernetes.io/auth-secret: {{ include "nvindex.fullname" . }}-auth-secret
+    nginx.ingress.kubernetes.io/auth-realm: 'Authentication Required'
+    {{- end }}
+
 spec:
   ingressClassName: nginx
   {{- if .Values.ingress.tls }}
