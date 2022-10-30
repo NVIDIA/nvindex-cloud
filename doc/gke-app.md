@@ -214,7 +214,7 @@ in a different location/bucket.
 ## Scene file
 
 When loading your own data, a scene configuration is required (`scene.prj`).
-This file and it's dependencies (colormaps, xac shaders, etc) have to be
+This file and its dependencies (colormaps, xac shaders, etc) have to be
 present in the same directory. 
 
 The below section represents a skeleton scene file that can be used as a
